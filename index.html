@@ -1,0 +1,1498 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Conversor Universal</title>
+<meta name="description" content="Convierte imágenes, audio, vídeo, documentos, hojas de cálculo, fuentes y subtítulos gratis y sin subir nada a internet: la conversión ocurre en tu navegador.">
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="theme-color" content="#0b7285">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
+<style>
+/* Layout: un banco de trabajo. Una columna de trabajo (el conversor primero) y un carril lateral fijo para publicidad en pantallas anchas. */
+:root{
+  --bg:#f3f5f9; --surface:#ffffff; --surface-2:#eaeef5; --fg:#141a2b; --muted:#5a6477; --line:#d9dfe9;
+  --accent:#0b7285; --accent-strong:#085c6b; --accent-soft:#e3f4f7; --on-accent:#ffffff;
+  --ok:#1f8f4e; --ok-soft:#e3f5ea; --warn:#b26a00; --warn-soft:#fff3dd; --danger:#c0392b; --danger-soft:#fde8e6;
+  --ad-bg:#f7f8fb; --ad-line:#c9d1de;
+  --shadow:0 10px 30px -12px rgba(20,26,43,.18);
+  --font-body:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --font-head:'Space Grotesk','Inter',system-ui,sans-serif;
+  --font-mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --radius:14px; --radius-sm:8px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1420; --surface:#171d2b; --surface-2:#1f2737; --fg:#e8ecf4; --muted:#9aa5ba; --line:#2b3447;
+    --accent:#4cc9de; --accent-strong:#7fdbe9; --accent-soft:#143944; --on-accent:#06212a;
+    --ok:#4ade80; --ok-soft:#163626; --warn:#fbbf24; --warn-soft:#3a2d12; --danger:#f87171; --danger-soft:#3b1d1d;
+    --ad-bg:#131927; --ad-line:#334059; --shadow:0 10px 30px -12px rgba(0,0,0,.6);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f1420; --surface:#171d2b; --surface-2:#1f2737; --fg:#e8ecf4; --muted:#9aa5ba; --line:#2b3447;
+  --accent:#4cc9de; --accent-strong:#7fdbe9; --accent-soft:#143944; --on-accent:#06212a;
+  --ok:#4ade80; --ok-soft:#163626; --warn:#fbbf24; --warn-soft:#3a2d12; --danger:#f87171; --danger-soft:#3b1d1d;
+  --ad-bg:#131927; --ad-line:#334059; --shadow:0 10px 30px -12px rgba(0,0,0,.6);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+body.has-sticky{padding-bottom:calc(110px + env(safe-area-inset-bottom,0px))}
+img,svg{max-width:100%}
+a{color:var(--accent)}
+h1,h2,h3,h4{font-family:var(--font-head);line-height:1.15;text-wrap:balance;margin:0}
+p{margin:0}
+button{font:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* Cabecera */
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--surface);border-bottom:1px solid var(--line)}
+.topbar .wrap{display:flex;align-items:center;gap:20px;min-height:60px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--fg);font-family:var(--font-head);font-weight:700;font-size:1.1rem}
+.brand-mark{width:34px;height:34px;border-radius:10px;background:var(--accent);color:var(--on-accent);display:grid;place-items:center;flex-shrink:0}
+.nav{display:none;gap:4px;margin-left:auto}
+.nav a{text-decoration:none;color:var(--muted);font-weight:500;padding:8px 12px;border-radius:var(--radius-sm);font-size:.95rem}
+.nav a:hover{color:var(--fg);background:var(--surface-2)}
+.theme-btn{margin-left:auto;background:var(--surface-2);border:1px solid var(--line);color:var(--fg);border-radius:999px;width:40px;height:40px;display:grid;place-items:center;cursor:pointer}
+.nav + .theme-btn{margin-left:0}
+@media (min-width:760px){.nav{display:flex}}
+
+/* Anuncios */
+.ad-slot{background:var(--ad-bg);border:1px dashed var(--ad-line);border-radius:var(--radius-sm);padding:6px 8px 8px;text-align:center;min-width:0}
+.ad-label{display:block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.ad-box{display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:13px;min-height:90px;overflow:hidden}
+.ad-slot.is-placeholder .ad-box::before{content:attr(data-placeholder);padding:8px}
+.ad-slot.is-live{border-style:solid}
+.ad-top{margin:16px auto 0;max-width:1180px}
+.ad-mid .ad-box,.ad-bottom .ad-box{min-height:250px}
+.ad-sidebar .ad-box{min-height:600px}
+.ad-results{margin-top:20px}
+.ad-sticky{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);box-shadow:0 -6px 24px -12px rgba(0,0,0,.35);padding-bottom:env(safe-area-inset-bottom,0px)}
+.ad-sticky-inner{max-width:1180px;margin:0 auto;display:flex;align-items:center;gap:8px;padding:6px max(16px,env(safe-area-inset-right,0px)) 6px max(16px,env(safe-area-inset-left,0px))}
+.ad-sticky .ad-slot{flex:1;min-width:0}
+.ad-sticky .ad-box{min-height:50px}
+@media (min-width:760px){.ad-sticky .ad-box{min-height:90px}}
+.ad-close{flex-shrink:0;width:34px;height:34px;border-radius:999px;border:1px solid var(--line);background:var(--surface-2);color:var(--fg);cursor:pointer;display:grid;place-items:center}
+
+/* Disposición principal */
+.page{padding-block:24px 48px}
+.layout{display:grid;grid-template-columns:minmax(0,1fr);gap:36px}
+.side-col{display:none}
+@media (min-width:1100px){
+  .layout{grid-template-columns:minmax(0,1fr) 300px}
+  .side-col{display:block}
+  .side-col .ad-slot{position:sticky;top:calc(76px + env(safe-area-inset-top,0px))}
+}
+.main-col{display:grid;gap:40px;min-width:0}
+
+/* Hero */
+.hero{display:grid;gap:12px;max-width:760px}
+.eyebrow{font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);font-weight:600}
+.hero h1{font-size:clamp(1.8rem,4.5vw,2.8rem);font-weight:700;letter-spacing:-.01em}
+.hero p{color:var(--muted);font-size:1.05rem;max-width:62ch}
+.hero-facts{display:flex;flex-wrap:wrap;gap:8px 18px;color:var(--muted);font-size:.9rem;margin-top:4px}
+.hero-facts span::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--ok);margin-right:8px;vertical-align:1px}
+
+/* Tarjeta del conversor */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.converter{padding:clamp(16px,3vw,28px);display:grid;gap:20px}
+.conv-head h2{font-size:1.3rem}
+.conv-sub{color:var(--muted);margin-top:4px}
+.dropzone{border:2px dashed var(--line);border-radius:var(--radius);padding:clamp(22px,4vw,40px) 16px;text-align:center;display:grid;gap:8px;justify-items:center;cursor:pointer;background:var(--surface-2);transition:border-color .15s,background .15s}
+.dropzone:hover,.dropzone.is-over{border-color:var(--accent);background:var(--accent-soft)}
+.dropzone .dz-icon{width:46px;height:46px;color:var(--accent)}
+.dz-title{font-weight:600;font-size:1.05rem}
+.dz-title .link{color:var(--accent);text-decoration:underline}
+.dz-hint{color:var(--muted);font-size:.9rem;max-width:52ch}
+.file-list{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.file-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--surface)}
+.file-ext{font-family:var(--font-mono);font-size:.72rem;font-weight:700;background:var(--surface-2);color:var(--muted);border-radius:6px;padding:6px 7px;min-width:46px;text-align:center;text-transform:uppercase}
+.file-row.is-mismatch .file-ext{background:var(--warn-soft);color:var(--warn)}
+.file-row.is-error .file-ext{background:var(--danger-soft);color:var(--danger)}
+.file-row.is-done .file-ext{background:var(--ok-soft);color:var(--ok)}
+.file-row.is-working .file-ext{background:var(--accent-soft);color:var(--accent)}
+.file-name{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.file-meta{color:var(--muted);font-size:.82rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.file-meta .warn{color:var(--warn)}
+.file-meta .err{color:var(--danger)}
+.icon-btn{background:none;border:1px solid transparent;color:var(--muted);width:34px;height:34px;border-radius:999px;cursor:pointer;display:grid;place-items:center}
+.icon-btn:hover{background:var(--surface-2);color:var(--fg)}
+.file-list-actions{display:flex;justify-content:flex-end}
+.controls{display:grid;gap:16px}
+.control-row{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+.control-label{font-weight:600}
+.select-wrap{flex:1 1 220px;min-width:0}
+select,input[type=text],input[type=number]{width:100%;font:inherit;color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-sm);padding:10px 12px;min-height:44px}
+select{cursor:pointer}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:var(--radius-sm);padding:11px 20px;font-weight:600;cursor:pointer;border:1px solid transparent;min-height:44px;text-decoration:none;white-space:nowrap}
+.btn-primary{background:var(--accent);color:var(--on-accent)}
+.btn-primary:hover{background:var(--accent-strong)}
+.btn-primary:disabled{opacity:.55;cursor:wait}
+.btn-ghost{background:transparent;border-color:var(--line);color:var(--fg)}
+.btn-ghost:hover{background:var(--surface-2)}
+.btn-sm{padding:7px 12px;min-height:36px;font-size:.9rem}
+.options{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px 18px}
+.options:empty{display:none}
+.opt{display:grid;gap:6px;min-width:0}
+.opt label{font-size:.88rem;font-weight:600;color:var(--muted)}
+.opt-check{display:flex;align-items:center;gap:10px;font-size:.95rem;cursor:pointer;grid-column:1/-1}
+.opt-check input{width:18px;height:18px;accent-color:var(--accent)}
+.opt-range{display:flex;align-items:center;gap:10px}
+.opt-range input{flex:1;accent-color:var(--accent)}
+.opt-range output{font-variant-numeric:tabular-nums;min-width:4ch;text-align:right;font-size:.9rem}
+.opt input[type=color]{width:64px;height:40px;border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--surface);padding:2px;cursor:pointer}
+.progress{display:grid;gap:8px;padding:14px 16px;border-radius:var(--radius-sm);background:var(--surface-2)}
+.progress-head{display:flex;justify-content:space-between;gap:12px;font-weight:600;font-size:.95rem}
+.progress-head span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.progress-head span:last-child{font-variant-numeric:tabular-nums}
+.bar{height:10px;border-radius:999px;background:var(--line);overflow:hidden}
+.bar-fill{height:100%;width:0;background:var(--accent);transition:width .2s}
+.progress-status{color:var(--muted);font-size:.88rem;min-height:1.3em}
+.results{display:grid;gap:14px;padding-top:6px;border-top:1px solid var(--line)}
+.results-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+.results-head h3{font-size:1.1rem}
+.results-actions{display:flex;flex-wrap:wrap;gap:8px}
+.results-note{color:var(--muted);font-size:.9rem;padding:10px 12px;border-radius:var(--radius-sm);background:var(--warn-soft)}
+.result-list{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.result-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--surface)}
+.thumb{width:56px;height:56px;border-radius:8px;background:var(--surface-2);display:grid;place-items:center;overflow:hidden;flex-shrink:0}
+.thumb img{width:100%;height:100%;object-fit:cover}
+.thumb .file-ext{min-width:0;background:transparent}
+
+/* Conversores populares */
+.section-head{display:grid;gap:6px;margin-bottom:18px}
+.section-head h2{font-size:1.5rem}
+.section-head p{color:var(--muted);max-width:62ch}
+.search{position:relative;margin-bottom:16px;max-width:420px}
+.search input{padding-left:40px}
+.search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--muted)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.tile{display:grid;gap:6px;padding:12px;border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--surface);cursor:pointer;text-align:left;color:var(--fg);transition:border-color .15s,transform .15s}
+.tile:hover{border-color:var(--accent);transform:translateY(-1px)}
+.tile-pair{display:flex;align-items:center;gap:6px;font-family:var(--font-head);font-weight:700;font-size:1rem}
+.tile-pair svg{width:16px;height:16px;color:var(--accent);flex-shrink:0}
+.tile-cat{font-size:.75rem;color:var(--muted);display:flex;align-items:center;gap:6px}
+.tile-cat svg{width:14px;height:14px}
+.tiles-empty{color:var(--muted);padding:16px 0}
+
+/* Formatos */
+.cat-list{display:grid;gap:10px}
+.cat-list details{border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--surface);padding:0 16px}
+.cat-list summary{display:flex;align-items:center;gap:12px;padding:14px 0;cursor:pointer;font-weight:600;font-family:var(--font-head);font-size:1.05rem;list-style:none}
+.cat-list summary::-webkit-details-marker{display:none}
+.cat-list summary svg{width:22px;height:22px;color:var(--accent);flex-shrink:0}
+.cat-list summary .count{margin-left:auto;color:var(--muted);font-weight:500;font-size:.85rem;font-family:var(--font-body)}
+.cat-body{display:grid;gap:12px;padding:0 0 16px}
+.cat-body h4{font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-family:var(--font-mono);font-size:.78rem;padding:4px 9px;border-radius:999px;background:var(--surface-2);color:var(--fg)}
+.chip.out{background:var(--accent-soft);color:var(--accent-strong)}
+:root[data-theme="dark"] .chip.out,:root:not([data-theme="light"]) .chip.out{color:var(--accent)}
+
+/* Pasos y FAQ */
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.step{padding:18px;border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--surface);display:grid;gap:8px;align-content:start}
+.step svg{width:28px;height:28px;color:var(--accent)}
+.step h3{font-size:1.05rem}
+.step p{color:var(--muted);font-size:.95rem}
+.faq{display:grid;gap:8px}
+.faq details{border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--surface);padding:0 16px}
+.faq summary{padding:14px 0;cursor:pointer;font-weight:600;list-style:none;display:flex;justify-content:space-between;gap:12px}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";color:var(--accent);font-weight:700;flex-shrink:0}
+.faq details[open] summary::after{content:"–"}
+.faq .faq-body{padding:0 0 16px;color:var(--muted)}
+.faq .faq-body p + p{margin-top:8px}
+.legal{display:grid;gap:10px;color:var(--muted);font-size:.93rem}
+.legal h2{font-size:1.25rem;color:var(--fg)}
+.legal h3{font-size:1rem;color:var(--fg);margin-top:8px}
+.legal ul{margin:0;padding-left:20px}
+
+/* Pie */
+.footer{border-top:1px solid var(--line);background:var(--surface);padding-block:28px}
+.footer .wrap{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;justify-content:space-between;color:var(--muted);font-size:.9rem}
+.footer nav{display:flex;flex-wrap:wrap;gap:6px 18px}
+.footer a{color:var(--muted);text-decoration:none}
+.footer a:hover{color:var(--fg)}
+
+/* Avisos */
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:30;max-width:min(92vw,520px);padding:12px 16px;border-radius:var(--radius-sm);background:var(--fg);color:var(--bg);font-size:.95rem;box-shadow:var(--shadow)}
+body.has-sticky .toast{bottom:calc(120px + env(safe-area-inset-bottom,0px))}
+.toast.ok{background:var(--ok);color:#fff}
+.toast.warn{background:var(--warn);color:#fff}
+.toast.danger{background:var(--danger);color:#fff}
+
+/* Contenedor oculto para generar PDF a partir de HTML */
+.pdf-host{position:absolute;left:-12000px;top:0;width:794px;background:#fff}
+.pdf-doc{color:#111;background:#fff;font:12pt/1.5 Georgia,'Times New Roman',serif;padding:4px}
+.pdf-doc img{max-width:100%}
+.pdf-doc table{border-collapse:collapse;width:100%}
+.pdf-doc td,.pdf-doc th{border:1px solid #999;padding:4px 6px;font-size:10pt}
+
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="#inicio" id="brandLink">
+      <span class="brand-mark" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h11l-3-3"/><path d="M20 17H9l3 3"/><path d="M4 7v4"/><path d="M20 17v-4"/></svg></span>
+      Conversor Universal
+    </a>
+    <nav class="nav" aria-label="Secciones">
+      <a href="#conversor">Convertir</a>
+      <a href="#conversores">Conversores</a>
+      <a href="#formatos">Formatos</a>
+      <a href="#preguntas">Preguntas</a>
+    </nav>
+    <button class="theme-btn" id="themeToggle" type="button" aria-label="Cambiar entre tema claro y oscuro" title="Tema claro / oscuro">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3a9 9 0 1 0 9 9c0-.5 0-1-.1-1.4A5.5 5.5 0 0 1 13.4 3.1C13 3 12.5 3 12 3z"/></svg>
+    </button>
+  </div>
+</header>
+
+<!-- ANUNCIO 1: banner superior (bajo la cabecera) -->
+<div class="wrap"><div class="ad-slot ad-top" data-ad="top" data-format="horizontal"><span class="ad-label">Publicidad</span><div class="ad-box" data-placeholder="Anuncio de Google · banner superior (728×90 escritorio · 320×100 móvil)"></div></div></div>
+
+<main class="page" id="inicio">
+  <div class="wrap">
+    <div class="layout">
+      <div class="main-col">
+
+        <section class="hero">
+          <span class="eyebrow" id="heroEyebrow">Conversor de archivos en línea</span>
+          <h1 id="heroTitle">Convierte cualquier archivo, gratis y sin subirlo a ningún servidor</h1>
+          <p id="heroSub">Imágenes, audio, vídeo, documentos, hojas de cálculo, archivos comprimidos, fuentes y subtítulos. Todo se procesa en tu navegador: tus archivos nunca salen de tu dispositivo.</p>
+          <div class="hero-facts"><span>Sin registro</span><span>Sin límite de archivos</span><span>Sin marcas de agua</span><span id="factFormats">Más de 60 formatos</span></div>
+        </section>
+
+        <section class="card converter" id="conversor" aria-labelledby="convTitle">
+          <div class="conv-head">
+            <h2 id="convTitle">Convertir archivos</h2>
+            <p class="conv-sub" id="convSub">Arrastra uno o varios archivos. Detectamos el tipo automáticamente y te mostramos las salidas disponibles.</p>
+          </div>
+
+          <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Seleccionar archivos para convertir">
+            <input type="file" id="fileInput" multiple hidden>
+            <svg class="dz-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"/><path d="m7 9 5-5 5 5"/><path d="M20 16v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3"/></svg>
+            <p class="dz-title">Suelta tus archivos aquí o <span class="link">elígelos desde tu dispositivo</span></p>
+            <p class="dz-hint" id="dzHint">Imágenes, audio, vídeo, PDF, Word, Excel, CSV, JSON, ZIP, fuentes, subtítulos…</p>
+          </div>
+
+          <ul class="file-list" id="fileList" hidden></ul>
+          <div class="file-list-actions" id="fileListActions" hidden><button class="btn btn-ghost btn-sm" id="clearFiles" type="button">Quitar todos</button></div>
+
+          <div class="controls" id="controls">
+            <div class="control-row">
+              <label for="targetSelect" class="control-label">Convertir a</label>
+              <div class="select-wrap"><select id="targetSelect" aria-label="Formato de salida"></select></div>
+              <button class="btn btn-primary" id="convertBtn" type="button">Convertir</button>
+              <button class="btn btn-ghost" id="cancelBtn" type="button" hidden>Cancelar</button>
+            </div>
+            <div class="options" id="options"></div>
+          </div>
+
+          <div class="progress" id="progress" hidden>
+            <div class="progress-head"><span id="progName">Preparando…</span><span id="progPct">0 %</span></div>
+            <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="bar"><div class="bar-fill" id="barFill"></div></div>
+            <p class="progress-status" id="progStatus" aria-live="polite"></p>
+          </div>
+
+          <div class="results" id="results" hidden>
+            <div class="results-head">
+              <h3 id="resultsTitle">Archivos convertidos</h3>
+              <div class="results-actions">
+                <button class="btn btn-primary" id="downloadAll" type="button">Descargar todo (.zip)</button>
+                <button class="btn btn-ghost" id="resetBtn" type="button">Convertir más archivos</button>
+              </div>
+            </div>
+            <p class="results-note" id="resultsNote" hidden></p>
+            <ul class="result-list" id="resultList"></ul>
+            <!-- ANUNCIO 4: bajo los resultados (solo visible tras convertir) -->
+            <div class="ad-slot ad-results" data-ad="results" data-format="horizontal"><span class="ad-label">Publicidad</span><div class="ad-box" data-placeholder="Anuncio de Google · bajo los resultados (responsive horizontal)"></div></div>
+          </div>
+        </section>
+
+        <!-- ANUNCIO 3: rectángulo entre el conversor y la lista de conversores -->
+        <div class="ad-slot ad-mid" data-ad="mid" data-format="rectangle"><span class="ad-label">Publicidad</span><div class="ad-box" data-placeholder="Anuncio de Google · rectángulo intermedio (336×280 / 300×250)"></div></div>
+
+        <section id="conversores" aria-labelledby="popTitle">
+          <div class="section-head">
+            <h2 id="popTitle">Todos los conversores</h2>
+            <p>Elige una conversión y el formato de salida quedará seleccionado. También puedes soltar cualquier archivo arriba y escoger la salida tú mismo.</p>
+          </div>
+          <div class="search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <input type="text" id="tileSearch" placeholder="Buscar: webp a png, mp4 a mp3, pdf a word…" aria-label="Buscar conversor">
+          </div>
+          <div class="tiles" id="tiles"></div>
+          <p class="tiles-empty" id="tilesEmpty" hidden>No hay conversores con ese nombre. Prueba soltando el archivo arriba: puede que el formato esté admitido igualmente.</p>
+        </section>
+
+        <section id="formatos" aria-labelledby="fmtTitle">
+          <div class="section-head">
+            <h2 id="fmtTitle">Formatos admitidos</h2>
+            <p>Cada categoría muestra qué puedes subir y a qué puedes convertirlo. Las conversiones de vídeo y de audio avanzado usan FFmpeg dentro del navegador.</p>
+          </div>
+          <div class="cat-list" id="catList"></div>
+        </section>
+
+        <section id="como-funciona" aria-labelledby="howTitle">
+          <div class="section-head">
+            <h2 id="howTitle">Cómo funciona</h2>
+            <p>No hay cola de subida ni servidores de por medio. Tu navegador hace el trabajo con WebAssembly y las API nativas del sistema.</p>
+          </div>
+          <div class="steps">
+            <div class="step"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4"/><path d="m7 9 5-5 5 5"/><path d="M20 16v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3"/></svg><h3>1. Añade tus archivos</h3><p>Arrástralos a la zona de carga o selecciónalos. Puedes añadir varios a la vez, incluso de distinto formato.</p></div>
+            <div class="step"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h11l-3-3"/><path d="M20 17H9l3 3"/></svg><h3>2. Elige el formato de salida</h3><p>Ajusta calidad, tamaño, bitrate o resolución si lo necesitas. Las opciones cambian según el formato.</p></div>
+            <div class="step"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v12"/><path d="m7 11 5 5 5-5"/><path d="M4 20h16"/></svg><h3>3. Descarga el resultado</h3><p>Descarga cada archivo por separado o todos juntos en un ZIP. Nada se guarda: al cerrar la pestaña desaparece.</p></div>
+          </div>
+        </section>
+
+        <section id="preguntas" aria-labelledby="faqTitle">
+          <div class="section-head"><h2 id="faqTitle">Preguntas frecuentes</h2></div>
+          <div class="faq">
+            <details><summary>¿Es gratis? ¿Hay límite de archivos o de tamaño?</summary><div class="faq-body"><p>Es gratis y no hay límite de archivos ni de conversiones. El único límite es la memoria de tu dispositivo: los vídeos muy grandes (más de 1 GB) pueden no caber en la memoria del navegador.</p></div></details>
+            <details><summary>¿Mis archivos se suben a algún servidor?</summary><div class="faq-body"><p>No. La conversión se ejecuta por completo en tu navegador. Puedes comprobarlo desconectando internet después de cargar la página: las conversiones de imágenes y documentos siguen funcionando. La única descarga es la de las librerías que hacen la conversión (por ejemplo, el motor de vídeo).</p></div></details>
+            <details><summary>¿Por qué la primera conversión de vídeo tarda en empezar?</summary><div class="faq-body"><p>El motor de vídeo y audio (FFmpeg compilado a WebAssembly) pesa unos 31 MB y se descarga solo la primera vez. Después queda en la caché del navegador. Convertir vídeo en el navegador es más lento que en un programa de escritorio: calcula entre 1 y 3 veces la duración del vídeo para recodificar en 1080p.</p><p>Si el formato de destino admite los códecs originales (por ejemplo, de MKV a MP4 con H.264), se activa el modo rápido y la conversión tarda segundos.</p></div></details>
+            <details><summary>¿Qué navegadores son compatibles?</summary><div class="faq-body"><p>Chrome, Edge, Firefox, Safari, Opera y Brave en sus versiones recientes, en ordenador y en móvil. Algunas salidas (AVIF, JPEG XL o WOFF) necesitan funciones modernas del navegador; si una no está disponible, verás un aviso.</p></div></details>
+            <details><summary>¿Puedo convertir varios archivos a la vez?</summary><div class="faq-body"><p>Sí. Añade todos los que quieras, elige la salida y pulsa Convertir. Al terminar puedes descargarlos uno a uno o todos en un único ZIP. Las imágenes también pueden unirse en un solo PDF.</p></div></details>
+            <details><summary>¿Cómo funciona la conversión de PDF a Word?</summary><div class="faq-body"><p>Extraemos el texto del PDF y lo volcamos en un documento DOCX con párrafos. El diseño, las columnas y las imágenes del PDF no se conservan. Para PDF escaneados (imágenes sin texto) el resultado estará vacío.</p></div></details>
+            <details><summary>¿Qué formatos no se admiten?</summary><div class="faq-body"><p>Archivos RAR y 7z, fuentes WOFF2, el formato antiguo DOC de Word, PSD, archivos RAW de cámara y vídeos protegidos con DRM. Las imágenes animadas (GIF o WEBP animado) se convierten usando el primer fotograma, salvo GIF a MP4 o WEBM, que conserva la animación.</p></div></details>
+          </div>
+        </section>
+
+        <!-- ANUNCIO 5: rectángulo antes del pie -->
+        <div class="ad-slot ad-bottom" data-ad="bottom" data-format="rectangle"><span class="ad-label">Publicidad</span><div class="ad-box" data-placeholder="Anuncio de Google · rectángulo inferior (336×280 / 300×250)"></div></div>
+
+        <section class="legal" id="privacidad">
+          <h2>Política de privacidad</h2>
+          <p><strong>Procesamiento local.</strong> Los archivos que añades se procesan en tu navegador y no se envían a nuestros servidores ni a terceros. No almacenamos copias ni metadatos de tus archivos.</p>
+          <p><strong>Publicidad.</strong> Este sitio muestra anuncios de Google AdSense. Google y sus socios pueden usar cookies e identificadores de dispositivo para mostrar anuncios basados en tus visitas anteriores a este u otros sitios. Puedes desactivar la publicidad personalizada en <a href="https://adssettings.google.com/" rel="noopener" target="_blank">Configuración de anuncios de Google</a> y consultar cómo usa Google los datos en <a href="https://policies.google.com/technologies/partner-sites" rel="noopener" target="_blank">su política para sitios asociados</a>.</p>
+          <p><strong>Estadísticas.</strong> Podemos recopilar datos agregados y anónimos de uso (páginas vistas, navegador, país) para mejorar el servicio.</p>
+          <p><strong>Preferencias locales.</strong> El tema claro u oscuro se guarda en tu navegador (localStorage) y no se comparte con nadie.</p>
+          <p><strong>Contacto.</strong> Para cualquier consulta sobre privacidad escribe a <span id="contactMail">contacto@tu-dominio.com</span>.</p>
+        </section>
+
+        <section class="legal" id="terminos">
+          <h2>Términos de uso</h2>
+          <ul>
+            <li>El servicio se ofrece tal cual, sin garantía de disponibilidad ni de que el resultado sea apto para un uso concreto. Comprueba siempre los archivos convertidos antes de usarlos.</li>
+            <li>Eres responsable de tener derechos sobre los archivos que conviertes. No uses el servicio para eludir protecciones de copia o DRM.</li>
+            <li>Las conversiones son locales; no nos hacemos responsables de pérdidas de datos en tu dispositivo.</li>
+            <li>Los anuncios mostrados son gestionados por Google; no respaldamos los productos anunciados.</li>
+          </ul>
+        </section>
+
+      </div>
+
+      <aside class="side-col" aria-label="Publicidad lateral">
+        <!-- ANUNCIO 2: rascacielos lateral fijo (solo escritorio) -->
+        <div class="ad-slot ad-sidebar" data-ad="sidebar" data-format="vertical"><span class="ad-label">Publicidad</span><div class="ad-box" data-placeholder="Anuncio de Google · lateral fijo (300×600 / 300×250)"></div></div>
+      </aside>
+    </div>
+  </div>
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <span>© <span id="year">2026</span> Conversor Universal · Conversión de archivos 100 % en el navegador.</span>
+    <nav aria-label="Legal"><a href="#privacidad">Privacidad</a><a href="#terminos">Términos</a><a href="#preguntas">Ayuda</a></nav>
+  </div>
+</footer>
+
+<!-- ANUNCIO 6: barra flotante inferior (se puede cerrar) -->
+<div class="ad-sticky" id="adSticky" hidden>
+  <div class="ad-sticky-inner">
+    <div class="ad-slot ad-slot-sticky" data-ad="sticky" data-format="horizontal"><span class="ad-label">Publicidad</span><div class="ad-box" data-placeholder="Anuncio flotante inferior · 320×50 móvil / 728×90 escritorio"></div></div>
+    <button class="ad-close" id="adClose" type="button" aria-label="Cerrar anuncio"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" hidden></div>
+<noscript><p style="padding:16px;text-align:center">Este conversor necesita JavaScript activado para funcionar.</p></noscript>
+
+<script>
+'use strict';
+/* =====================================================================
+   1) CONFIGURACIÓN DE ANUNCIOS (Google AdSense)
+   ---------------------------------------------------------------------
+   - Pon enabled: true cuando tu cuenta esté aprobada.
+   - client: tu ID de editor (ca-pub-…).
+   - slots: el ID de cada bloque de anuncios creado en AdSense.
+   - autoAds: true si además quieres que Google coloque anuncios automáticos
+     (incluye los "anchor ads" flotantes oficiales de Google).
+   - sticky: muestra la barra flotante inferior propia (con botón de cerrar).
+   Mientras enabled sea false se muestran cajas de ejemplo en cada posición.
+   ===================================================================== */
+const ADS = {
+  enabled: false,
+  client: 'ca-pub-XXXXXXXXXXXXXXXX',
+  autoAds: false,
+  sticky: true,
+  slots: {
+    top: '1111111111',      // Banner superior, bajo la cabecera
+    sidebar: '2222222222',  // Lateral fijo (solo escritorio)
+    mid: '3333333333',      // Rectángulo entre el conversor y la lista
+    results: '4444444444',  // Bajo los resultados de la conversión
+    bottom: '5555555555',   // Rectángulo antes del pie
+    sticky: '6666666666'    // Barra flotante inferior
+  }
+};
+
+/* 2) Librerías externas (se cargan solo cuando hacen falta) */
+const LIB = {
+  jszip: 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js',
+  pdfjs: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js',
+  pdfjsWorker: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js',
+  pdflib: 'https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js',
+  pdfmake: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/pdfmake.min.js',
+  pdfmakeFonts: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/vfs_fonts.min.js',
+  htmlToPdfmake: 'https://cdn.jsdelivr.net/npm/html-to-pdfmake@2.5.13/browser.js',
+  html2pdf: 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js',
+  mammoth: 'https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js',
+  marked: 'https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js',
+  turndown: 'https://cdnjs.cloudflare.com/ajax/libs/turndown/7.1.3/turndown.min.js',
+  xlsx: 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',
+  jsyaml: 'https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js',
+  lamejs: 'https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.0/lame.min.js',
+  pako: 'https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js',
+  heic2any: 'https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js',
+  utif: 'https://unpkg.com/utif@3.1.0/UTIF.js',
+  docx: 'https://unpkg.com/docx@8.5.0/build/index.umd.js',
+  ffmpeg: 'https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js',
+  ffmpegWorker: 'https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd/814.ffmpeg.js',
+  ffmpegCore: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.js',
+  ffmpegWasm: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.wasm',
+  avif: 'https://cdn.jsdelivr.net/npm/@jsquash/avif@2.1.1/+esm',
+  webp: 'https://cdn.jsdelivr.net/npm/@jsquash/webp@1.4.0/+esm',
+  jxl: 'https://cdn.jsdelivr.net/npm/@jsquash/jxl@1.2.0/+esm',
+  gifenc: 'https://cdn.jsdelivr.net/npm/gifenc@1.0.3/+esm'
+};
+
+const MIME = {
+  png:'image/png', jpg:'image/jpeg', jpeg:'image/jpeg', webp:'image/webp', avif:'image/avif', jxl:'image/jxl', gif:'image/gif', bmp:'image/bmp', tiff:'image/tiff', ico:'image/x-icon', svg:'image/svg+xml',
+  pdf:'application/pdf', mp4:'video/mp4', webm:'video/webm', mkv:'video/x-matroska', mov:'video/quicktime', avi:'video/x-msvideo',
+  mp3:'audio/mpeg', wav:'audio/wav', ogg:'audio/ogg', m4a:'audio/mp4', flac:'audio/flac', opus:'audio/ogg', aiff:'audio/aiff',
+  xlsx:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', ods:'application/vnd.oasis.opendocument.spreadsheet', csv:'text/csv', tsv:'text/tab-separated-values',
+  json:'application/json', yaml:'text/yaml', xml:'application/xml', html:'text/html', txt:'text/plain', md:'text/markdown', sql:'application/sql',
+  docx:'application/vnd.openxmlformats-officedocument.wordprocessingml.document', epub:'application/epub+zip', zip:'application/zip', 'tar.gz':'application/gzip',
+  woff:'font/woff', ttf:'font/ttf', otf:'font/otf', srt:'application/x-subrip', vtt:'text/vtt'
+};
+
+/* 3) Utilidades */
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const clamp = (v, a, b) => Math.max(a, Math.min(b, Number.isFinite(v) ? v : 0));
+let _uid = 0; const uid = () => 'f' + (++_uid) + '_' + Date.now().toString(36);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const yieldUI = () => new Promise(r => setTimeout(r, 0));
+function extOf(name) { const n = String(name || '').toLowerCase(); if (/\.tar\.gz$/.test(n)) return 'tgz'; const i = n.lastIndexOf('.'); return i < 0 ? '' : n.slice(i + 1); }
+function baseOf(name) { let n = String(name || ''); if (/\.tar\.gz$/i.test(n)) return n.slice(0, -7); const i = n.lastIndexOf('.'); return i <= 0 ? n : n.slice(0, i); }
+function fmtBytes(b) { if (b < 1024) return b + ' B'; if (b < 1048576) return (b / 1024).toFixed(1) + ' KB'; if (b < 1073741824) return (b / 1048576).toFixed(1) + ' MB'; return (b / 1073741824).toFixed(2) + ' GB'; }
+function safeFile(s) { return String(s).replace(/[\\/:*?"<>|]+/g, '_').replace(/\s+/g, ' ').trim() || 'archivo'; }
+function safeTag(s) { let t = String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9_]/g, '_'); if (!/^[A-Za-z_]/.test(t)) t = '_' + t; return t || '_'; }
+function safeSheet(s) { return String(s).replace(/[\[\]:*?\/\\]/g, ' ').slice(0, 31) || 'Hoja1'; }
+function textBlob(text, mime) { return new Blob([text], { type: (mime || 'text/plain') + ';charset=utf-8' }); }
+function pad4(n) { return (n + 3) & ~3; }
+const _scripts = {};
+function loadScript(url) {
+  if (!_scripts[url]) _scripts[url] = new Promise((res, rej) => {
+    const s = document.createElement('script'); s.src = url; s.async = true;
+    s.onload = () => res(); s.onerror = () => { delete _scripts[url]; rej(new Error('No se pudo cargar una librería necesaria (' + url.split('/')[2] + '). Comprueba tu conexión a internet.')); };
+    document.head.appendChild(s);
+  });
+  return _scripts[url];
+}
+const _mods = {};
+function loadModule(url) { if (!_mods[url]) _mods[url] = import(url).catch(e => { delete _mods[url]; throw new Error('No se pudo cargar el códec necesario desde ' + url.split('/')[2] + ' (' + (e.message || e) + ').'); }); return _mods[url]; }
+async function readTextSmart(file) {
+  const buf = await file.arrayBuffer();
+  try { return new TextDecoder('utf-8', { fatal: true }).decode(buf); } catch (_) { return new TextDecoder('windows-1252').decode(buf); }
+}
+function fileToDataUrl(blob) { return new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = () => rej(r.error); r.readAsDataURL(blob); }); }
+async function blobToBase64(blob) { return (await fileToDataUrl(blob)).split(',')[1]; }
+function makeCanvas(w, h) { const c = document.createElement('canvas'); c.width = Math.max(1, Math.round(w)); c.height = Math.max(1, Math.round(h)); return c; }
+function canvasToBlob(c, mime, q) { return new Promise((res, rej) => c.toBlob(b => b ? res(b) : rej(new Error('El navegador no pudo codificar la imagen como ' + mime)), mime, q)); }
+function getImageData(c) { return c.getContext('2d').getImageData(0, 0, c.width, c.height); }
+async function compressBytes(bytes, format) { if (!('CompressionStream' in window)) throw new Error('Tu navegador no admite compresión nativa (CompressionStream). Actualízalo.'); return new Response(new Blob([bytes]).stream().pipeThrough(new CompressionStream(format))).arrayBuffer(); }
+async function decompressBytes(bytes, format) { if (!('DecompressionStream' in window)) throw new Error('Tu navegador no admite descompresión nativa (DecompressionStream). Actualízalo.'); return new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream(format))).arrayBuffer(); }
+function toast(msg, type) { const t = $('#toast'); t.textContent = msg; t.className = 'toast' + (type ? ' ' + type : ''); t.hidden = false; clearTimeout(toast._t); toast._t = setTimeout(() => { t.hidden = true; }, type === 'danger' ? 7000 : 3500); }
+
+/* 4) Iconos por categoría */
+const ICON = {
+  image: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-8 8"/></svg>',
+  audio: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V6l11-2v12"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>',
+  video: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18M3 15h18M8 5v14M16 5v14"/></svg>',
+  document: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h8"/></svg>',
+  data: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M3 15h18M9 4v16M15 4v16"/></svg>',
+  archive: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h18v13H3z"/><path d="M3 7l2-3h14l2 3"/><path d="M10 12h4"/></svg>',
+  font: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20 10 4h1l6 16"/><path d="M6.5 14h8"/><path d="M20 8v12"/></svg>',
+  subtitle: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 13h5M14 13h3M7 16h3M12 16h5"/></svg>',
+  universal: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h18v13H3z"/><path d="M3 7l2-3h14l2 3"/></svg>'
+};
+
+/* 5) Catálogo de categorías, entradas y salidas */
+const CATS = {
+  image: { label: 'Imágenes', inputs: ['png','jpg','jpeg','jfif','webp','gif','bmp','svg','ico','avif','tif','tiff','heic','heif','jxl'],
+    outputs: [
+      { id:'png', label:'PNG', ext:'png', opts:['resize'] },
+      { id:'jpg', label:'JPG', ext:'jpg', opts:['quality','resize','bg'] },
+      { id:'webp', label:'WEBP', ext:'webp', opts:['quality','resize'] },
+      { id:'avif', label:'AVIF', ext:'avif', opts:['quality','resize'] },
+      { id:'jxl', label:'JPEG XL', ext:'jxl', opts:['quality','resize'] },
+      { id:'gif', label:'GIF', ext:'gif', opts:['resize','bg'] },
+      { id:'bmp', label:'BMP', ext:'bmp', opts:['resize','bg'] },
+      { id:'tiff', label:'TIFF', ext:'tiff', opts:['resize'] },
+      { id:'ico', label:'ICO (icono de Windows / favicon)', ext:'ico', opts:['icoSize'] },
+      { id:'svg', label:'SVG (imagen incrustada)', ext:'svg', opts:['resize'] },
+      { id:'pdf', label:'PDF', ext:'pdf', opts:['pdfCombine','pdfPage','resize','bg'], batch:true },
+      { id:'mp4', label:'MP4 (vídeo desde GIF animado)', ext:'mp4', only:['gif'], opts:['videoQ'] },
+      { id:'webm', label:'WEBM (vídeo desde GIF animado)', ext:'webm', only:['gif'], opts:['videoQ'] }
+    ] },
+  audio: { label: 'Audio', inputs: ['mp3','wav','ogg','oga','m4a','aac','flac','opus','aiff','aif','wma','amr','mka','weba'],
+    outputs: [
+      { id:'mp3', label:'MP3', ext:'mp3', opts:['bitrate'] },
+      { id:'wav', label:'WAV', ext:'wav', opts:[] },
+      { id:'ogg', label:'OGG (Vorbis)', ext:'ogg', opts:['bitrate'] },
+      { id:'m4a', label:'M4A (AAC)', ext:'m4a', opts:['bitrate'] },
+      { id:'flac', label:'FLAC (sin pérdida)', ext:'flac', opts:[] },
+      { id:'opus', label:'OPUS', ext:'opus', opts:['bitrate'] },
+      { id:'aiff', label:'AIFF', ext:'aiff', opts:[] }
+    ] },
+  video: { label: 'Vídeo', inputs: ['mp4','webm','mov','avi','mkv','flv','wmv','m4v','3gp','mpeg','mpg','ts','mts','m2ts','ogv','vob'],
+    outputs: [
+      { id:'mp4', label:'MP4 (H.264)', ext:'mp4', opts:['videoRes','videoQ','videoFast','mute','bitrate'] },
+      { id:'webm', label:'WEBM (VP8)', ext:'webm', opts:['videoRes','videoQ','videoFast','mute','bitrate'] },
+      { id:'mkv', label:'MKV', ext:'mkv', opts:['videoRes','videoQ','videoFast','mute','bitrate'] },
+      { id:'mov', label:'MOV', ext:'mov', opts:['videoRes','videoQ','videoFast','mute','bitrate'] },
+      { id:'avi', label:'AVI', ext:'avi', opts:['videoRes','videoQ','mute','bitrate'] },
+      { id:'gif', label:'GIF animado', ext:'gif', opts:['gifFps','gifWidth'] },
+      { id:'mp3', label:'MP3 (solo el audio)', ext:'mp3', opts:['bitrate'] },
+      { id:'wav', label:'WAV (solo el audio)', ext:'wav', opts:[] },
+      { id:'m4a', label:'M4A (solo el audio)', ext:'m4a', opts:['bitrate'] },
+      { id:'ogg', label:'OGG (solo el audio)', ext:'ogg', opts:['bitrate'] }
+    ] },
+  document: { label: 'Documentos', inputs: ['pdf','docx','odt','rtf','txt','md','markdown','html','htm','epub'],
+    outputs: [
+      { id:'pdf', label:'PDF', ext:'pdf', opts:[], not:['pdf'] },
+      { id:'docx', label:'DOCX (Word)', ext:'docx', opts:[] },
+      { id:'html', label:'HTML', ext:'html', opts:[] },
+      { id:'txt', label:'TXT (texto plano)', ext:'txt', opts:[] },
+      { id:'md', label:'Markdown', ext:'md', opts:[] },
+      { id:'epub', label:'EPUB (libro electrónico)', ext:'epub', opts:[] },
+      { id:'jpg-pages', label:'JPG (una imagen por página)', ext:'jpg', only:['pdf'], opts:['pageScale'] },
+      { id:'png-pages', label:'PNG (una imagen por página)', ext:'png', only:['pdf'], opts:['pageScale'] },
+      { id:'pdf-merge', label:'PDF unido (todos en uno)', ext:'pdf', only:['pdf'], opts:[], batch:true },
+      { id:'pdf-split', label:'PDF dividido (una página por archivo)', ext:'pdf', only:['pdf'], opts:[] }
+    ] },
+  data: { label: 'Hojas de cálculo y datos', inputs: ['xlsx','xls','xlsm','xlsb','ods','csv','tsv','json','xml','yaml','yml'],
+    outputs: [
+      { id:'xlsx', label:'XLSX (Excel)', ext:'xlsx', opts:['csvDelim','headerRow'] },
+      { id:'ods', label:'ODS (LibreOffice)', ext:'ods', opts:['csvDelim','headerRow'] },
+      { id:'csv', label:'CSV', ext:'csv', opts:['csvDelim'] },
+      { id:'tsv', label:'TSV (tabulado)', ext:'tsv', opts:[] },
+      { id:'json', label:'JSON', ext:'json', opts:['csvDelim','headerRow'] },
+      { id:'yaml', label:'YAML', ext:'yaml', opts:['csvDelim','headerRow'] },
+      { id:'xml', label:'XML', ext:'xml', opts:['csvDelim','headerRow'] },
+      { id:'html', label:'HTML (tabla)', ext:'html', opts:['csvDelim'] },
+      { id:'md', label:'Markdown (tabla)', ext:'md', opts:['csvDelim'] },
+      { id:'sql', label:'SQL (sentencias INSERT)', ext:'sql', opts:['csvDelim'] },
+      { id:'pdf', label:'PDF (tabla)', ext:'pdf', opts:['csvDelim'] }
+    ] },
+  archive: { label: 'Archivos comprimidos', inputs: ['zip','tar','gz','tgz'],
+    outputs: [
+      { id:'extract', label:'Extraer el contenido', ext:'', opts:[] }
+    ] },
+  font: { label: 'Fuentes tipográficas', inputs: ['ttf','otf','woff'],
+    outputs: [
+      { id:'woff', label:'WOFF (fuente web)', ext:'woff', only:['ttf','otf'], opts:[] },
+      { id:'ttf', label:'TTF / OTF (según el origen)', ext:'ttf', only:['woff'], opts:[] }
+    ] },
+  subtitle: { label: 'Subtítulos', inputs: ['srt','vtt','sbv'],
+    outputs: [
+      { id:'srt', label:'SRT', ext:'srt', opts:['subOffset'] },
+      { id:'vtt', label:'VTT (WebVTT)', ext:'vtt', opts:['subOffset'] },
+      { id:'txt', label:'TXT (solo el texto)', ext:'txt', opts:[] }
+    ] }
+};
+const UNIVERSAL = [
+  { id:'zip', label:'ZIP (comprimir todo en uno)', ext:'zip', batch:true, universal:true, opts:['zipName'] },
+  { id:'targz', label:'TAR.GZ (comprimir todo en uno)', ext:'tar.gz', batch:true, universal:true, opts:['zipName'] },
+  { id:'base64', label:'Base64 (texto, data URI)', ext:'txt', universal:true, opts:[] }
+];
+const OPTS = {
+  quality: { type:'range', label:'Calidad', min:10, max:100, step:5, def:90, suffix:' %' },
+  resize: { type:'select', label:'Tamaño', def:'orig', choices:[['orig','Original'],['p75','75 %'],['p50','50 %'],['p25','25 %'],['w3840','Máximo 3840 px'],['w1920','Máximo 1920 px'],['w1280','Máximo 1280 px'],['w800','Máximo 800 px'],['w512','Máximo 512 px'],['w256','Máximo 256 px']] },
+  bg: { type:'color', label:'Color de fondo (sustituye la transparencia)', def:'#ffffff' },
+  icoSize: { type:'select', label:'Tamaños del icono', def:'multi', choices:[['multi','Multitamaño (16 a 256 px)'],['256','256 px'],['128','128 px'],['64','64 px'],['48','48 px'],['32','32 px'],['16','16 px']] },
+  pdfCombine: { type:'check', label:'Unir todas las imágenes en un solo PDF', def:true },
+  pdfPage: { type:'select', label:'Tamaño de página', def:'fit', choices:[['fit','Ajustada a cada imagen'],['a4','A4 vertical'],['a4l','A4 horizontal'],['letter','Carta']] },
+  bitrate: { type:'select', label:'Bitrate de audio', def:'192', choices:[['128','128 kbps'],['192','192 kbps'],['256','256 kbps'],['320','320 kbps']] },
+  videoRes: { type:'select', label:'Resolución', def:'orig', choices:[['orig','Original'],['1080','1080p'],['720','720p'],['480','480p'],['360','360p']] },
+  videoQ: { type:'select', label:'Calidad de vídeo', def:'media', choices:[['alta','Alta (archivo más grande)'],['media','Media'],['baja','Baja (archivo más pequeño)']] },
+  videoFast: { type:'check', label:'Modo rápido: no recodificar si los códecs ya son compatibles', def:true },
+  mute: { type:'check', label:'Quitar el audio', def:false },
+  gifFps: { type:'select', label:'Fotogramas por segundo', def:'12', choices:[['8','8 fps'],['10','10 fps'],['12','12 fps'],['15','15 fps'],['20','20 fps'],['25','25 fps']] },
+  gifWidth: { type:'select', label:'Ancho del GIF', def:'480', choices:[['320','320 px'],['480','480 px'],['640','640 px'],['800','800 px'],['orig','Original']] },
+  pageScale: { type:'select', label:'Resolución de las páginas', def:'2', choices:[['1','Normal (72 ppp)'],['2','Alta (144 ppp)'],['3','Muy alta (216 ppp)']] },
+  csvDelim: { type:'select', label:'Separador CSV', def:'auto', choices:[['auto','Detectar automáticamente'],[',','Coma (,)'],[';','Punto y coma (;)'],['\t','Tabulador']] },
+  headerRow: { type:'check', label:'La primera fila contiene los encabezados', def:true },
+  subOffset: { type:'number', label:'Desplazar tiempos (segundos; admite negativos)', def:0, step:0.1 },
+  zipName: { type:'text', label:'Nombre del archivo comprimido (opcional)', def:'' }
+};
+/* Conversores populares: [origen, destino, categoría, id de salida (si difiere)] */
+const POPULAR = [
+  ['webp','png','image'],['png','jpg','image'],['jpg','png','image'],['heic','jpg','image'],['png','webp','image'],['jpg','webp','image'],['avif','jpg','image'],['avif','png','image'],['png','ico','image'],['svg','png','image'],['jpg','pdf','image'],['png','pdf','image'],['gif','mp4','image'],['tiff','jpg','image'],['bmp','png','image'],['png','avif','image'],['webp','jpg','image'],['jpg','ico','image'],['png','bmp','image'],['heic','png','image'],['jxl','png','image'],['png','jxl','image'],['png','gif','image'],
+  ['mp4','mp3','video'],['mp4','gif','video'],['mov','mp4','video'],['mkv','mp4','video'],['webm','mp4','video'],['avi','mp4','video'],['mp4','webm','video'],['mp4','mkv','video'],['mp4','mov','video'],['flv','mp4','video'],['wmv','mp4','video'],['mp4','avi','video'],['mov','gif','video'],['mkv','mp3','video'],['m4v','mp4','video'],['3gp','mp4','video'],['ts','mp4','video'],['mp4','wav','video'],
+  ['mp3','wav','audio'],['wav','mp3','audio'],['m4a','mp3','audio'],['flac','mp3','audio'],['ogg','mp3','audio'],['mp3','ogg','audio'],['wav','flac','audio'],['aac','mp3','audio'],['opus','mp3','audio'],['mp3','m4a','audio'],['wma','mp3','audio'],['aiff','mp3','audio'],['mp3','flac','audio'],['mp3','opus','audio'],
+  ['pdf','jpg','document','jpg-pages'],['pdf','png','document','png-pages'],['pdf','docx','document'],['pdf','txt','document'],['docx','pdf','document'],['docx','txt','document'],['docx','md','document'],['docx','html','document'],['md','pdf','document'],['md','html','document'],['md','docx','document'],['html','pdf','document'],['html','md','document'],['html','docx','document'],['txt','pdf','document'],['txt','docx','document'],['odt','pdf','document'],['odt','docx','document'],['epub','pdf','document'],['epub','txt','document'],['rtf','txt','document'],['rtf','docx','document'],['docx','epub','document'],['md','epub','document'],['pdf','epub','document'],
+  ['xlsx','csv','data'],['csv','xlsx','data'],['json','csv','data'],['csv','json','data'],['json','yaml','data'],['yaml','json','data'],['xml','json','data'],['json','xml','data'],['xlsx','json','data'],['xlsx','pdf','data'],['ods','xlsx','data'],['csv','sql','data'],['xls','xlsx','data'],['xlsx','ods','data'],['json','xlsx','data'],['csv','md','data'],['xlsx','html','data'],['xml','csv','data'],
+  ['zip','extraer','archive','extract'],['tar.gz','zip','archive','zip'],['zip','tar.gz','archive','targz'],['tar','zip','archive','zip'],
+  ['ttf','woff','font'],['otf','woff','font'],['woff','ttf','font'],
+  ['srt','vtt','subtitle'],['vtt','srt','subtitle'],['srt','txt','subtitle'],['sbv','srt','subtitle']
+];
+const POPULAR_BY_ID = {};
+POPULAR.forEach(p => { p.id = (p[0] + '-a-' + p[1]).replace(/\./g, ''); p.cat = p[2]; p.target = p[3] || p[1]; POPULAR_BY_ID[p.id] = p; });
+
+/* 6) Estado y elementos de la interfaz */
+const state = { files: [], category: 'image', target: 'png', opts: {}, results: [], busy: false, cancel: false, route: null };
+const el = {};
+['dropzone','fileInput','fileList','fileListActions','clearFiles','targetSelect','convertBtn','cancelBtn','options','progress','progName','progPct','bar','barFill','progStatus','results','resultsTitle','resultsNote','resultList','downloadAll','resetBtn','tiles','tilesEmpty','tileSearch','catList','heroTitle','heroSub','heroEyebrow','convSub','themeToggle','adSticky','adClose','factFormats','year'].forEach(id => { el[id] = document.getElementById(id); });
+
+function detectCategory(ext, mime) {
+  for (const [k, c] of Object.entries(CATS)) if (c.inputs.includes(ext)) return k;
+  if (mime) { if (mime.startsWith('image/')) return 'image'; if (mime.startsWith('audio/')) return 'audio'; if (mime.startsWith('video/')) return 'video'; if (mime.startsWith('text/')) return 'document'; }
+  return null;
+}
+function addFiles(list) {
+  const incoming = Array.from(list || []).filter(f => f && typeof f.size === 'number');
+  if (!incoming.length) return;
+  for (const f of incoming) { const ext = extOf(f.name); state.files.push({ id: uid(), file: f, ext, cat: detectCategory(ext, f.type), name: f.name, size: f.size, status: '' }); }
+  const counts = {}; state.files.forEach(x => { if (x.cat) counts[x.cat] = (counts[x.cat] || 0) + 1; });
+  if (!counts[state.category]) { const best = Object.entries(counts).sort((a, b) => b[1] - a[1])[0]; if (best) { state.category = best[0]; state.route = null; } }
+  hideResults();
+  renderFiles(); renderTargets(); updateHero();
+}
+function removeFile(id) { state.files = state.files.filter(x => x.id !== id); renderFiles(); renderTargets(); }
+function renderFiles() {
+  const target = getTargetDef();
+  el.fileList.innerHTML = state.files.map(x => {
+    const mismatch = target && !target.universal && x.cat !== state.category;
+    const cls = ['file-row', mismatch ? 'is-mismatch' : '', x.status ? 'is-' + x.status : ''].join(' ');
+    let meta = fmtBytes(x.size) + ' · ' + (x.cat ? CATS[x.cat].label : 'Formato no reconocido');
+    if (mismatch) meta += ' · <span class="warn">se omitirá: no es ' + esc(CATS[state.category].label.toLowerCase()) + '</span>';
+    if (x.status === 'error') meta = '<span class="err">' + esc(x.error || 'Error') + '</span>';
+    if (x.status === 'done') meta += ' · convertido';
+    return `<li class="${cls}" data-id="${x.id}"><span class="file-ext">${esc(x.ext || '?')}</span><div><div class="file-name" title="${esc(x.name)}">${esc(x.name)}</div><div class="file-meta">${meta}</div></div><button class="icon-btn" type="button" data-remove="${x.id}" aria-label="Quitar ${esc(x.name)}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></li>`;
+  }).join('');
+  el.fileList.hidden = !state.files.length; el.fileListActions.hidden = state.files.length < 2;
+}
+function markFile(id, status, error) { const x = state.files.find(f => f.id === id); if (!x) return; x.status = status; x.error = error; const row = el.fileList.querySelector(`[data-id="${id}"]`); if (row) { row.classList.remove('is-working', 'is-done', 'is-error'); row.classList.add('is-' + status); const m = row.querySelector('.file-meta'); if (status === 'error') m.innerHTML = '<span class="err">' + esc(error) + '</span>'; else if (status === 'done') m.innerHTML = esc(fmtBytes(x.size)) + ' · convertido'; else if (status === 'working') m.innerHTML = esc(fmtBytes(x.size)) + ' · convirtiendo…'; } }
+function availableOutputs() {
+  const cat = CATS[state.category]; const exts = state.files.map(x => x.ext);
+  const outs = cat.outputs.filter(o => {
+    if (o.only && exts.length && !exts.some(e => o.only.includes(e))) return false;
+    if (o.only && !exts.length) return false;
+    if (o.not && exts.length && exts.every(e => o.not.includes(e))) return false;
+    return true;
+  });
+  return outs;
+}
+function getTargetDef() { return availableOutputs().find(o => o.id === state.target) || UNIVERSAL.find(o => o.id === state.target) || null; }
+function renderTargets() {
+  const outs = availableOutputs();
+  const cat = CATS[state.category];
+  let html = `<optgroup label="${esc(cat.label)}">` + outs.map(o => `<option value="${o.id}">${esc(o.label)}</option>`).join('') + '</optgroup>';
+  html += '<optgroup label="Comprimir y otros">' + UNIVERSAL.map(o => `<option value="${o.id}">${esc(o.label)}</option>`).join('') + '</optgroup>';
+  el.targetSelect.innerHTML = html;
+  if (!outs.some(o => o.id === state.target) && !UNIVERSAL.some(o => o.id === state.target)) state.target = outs.length ? outs[0].id : UNIVERSAL[0].id;
+  el.targetSelect.value = state.target;
+  renderOptions(); renderFiles();
+}
+function renderOptions() {
+  const t = getTargetDef(); const keys = (t && t.opts) || [];
+  el.options.innerHTML = keys.map(k => {
+    const d = OPTS[k]; const val = state.opts[k] !== undefined ? state.opts[k] : d.def; const id = 'opt-' + k;
+    if (d.type === 'range') return `<div class="opt"><label for="${id}">${esc(d.label)}</label><div class="opt-range"><input type="range" id="${id}" data-opt="${k}" min="${d.min}" max="${d.max}" step="${d.step}" value="${val}"><output for="${id}">${val}${d.suffix || ''}</output></div></div>`;
+    if (d.type === 'select') return `<div class="opt"><label for="${id}">${esc(d.label)}</label><select id="${id}" data-opt="${k}">${d.choices.map(([v, l]) => `<option value="${esc(v)}"${String(v) === String(val) ? ' selected' : ''}>${esc(l)}</option>`).join('')}</select></div>`;
+    if (d.type === 'check') return `<label class="opt-check"><input type="checkbox" id="${id}" data-opt="${k}"${val ? ' checked' : ''}> ${esc(d.label)}</label>`;
+    if (d.type === 'color') return `<div class="opt"><label for="${id}">${esc(d.label)}</label><input type="color" id="${id}" data-opt="${k}" value="${esc(val)}"></div>`;
+    if (d.type === 'number') return `<div class="opt"><label for="${id}">${esc(d.label)}</label><input type="number" id="${id}" data-opt="${k}" step="${d.step || 1}" value="${esc(val)}"></div>`;
+    return `<div class="opt"><label for="${id}">${esc(d.label)}</label><input type="text" id="${id}" data-opt="${k}" value="${esc(val)}"></div>`;
+  }).join('');
+}
+function collectOpts(t) { const o = {}; ((t && t.opts) || []).forEach(k => { const d = OPTS[k]; o[k] = state.opts[k] !== undefined ? state.opts[k] : d.def; }); return o; }
+el.options.addEventListener('input', e => {
+  const k = e.target.dataset.opt; if (!k) return; const d = OPTS[k];
+  state.opts[k] = d.type === 'check' ? e.target.checked : (d.type === 'range' || d.type === 'number') ? Number(e.target.value) : e.target.value;
+  if (d.type === 'range') { const out = e.target.parentElement.querySelector('output'); if (out) out.textContent = e.target.value + (d.suffix || ''); }
+});
+el.targetSelect.addEventListener('change', () => { state.target = el.targetSelect.value; state.route = null; renderOptions(); renderFiles(); updateHero(); });
+el.fileList.addEventListener('click', e => { const b = e.target.closest('[data-remove]'); if (b) removeFile(b.dataset.remove); });
+el.clearFiles.addEventListener('click', () => { state.files = []; renderFiles(); renderTargets(); });
+
+/* Zona de carga */
+el.dropzone.addEventListener('click', () => el.fileInput.click());
+el.dropzone.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); el.fileInput.click(); } });
+el.fileInput.addEventListener('change', () => { addFiles(el.fileInput.files); el.fileInput.value = ''; });
+['dragenter', 'dragover'].forEach(ev => el.dropzone.addEventListener(ev, e => { e.preventDefault(); el.dropzone.classList.add('is-over'); }));
+['dragleave', 'drop'].forEach(ev => el.dropzone.addEventListener(ev, e => { e.preventDefault(); el.dropzone.classList.remove('is-over'); }));
+el.dropzone.addEventListener('drop', e => { addFiles(e.dataTransfer.files); });
+document.addEventListener('dragover', e => e.preventDefault());
+document.addEventListener('drop', e => { if (!el.dropzone.contains(e.target)) { e.preventDefault(); if (e.dataTransfer && e.dataTransfer.files.length) addFiles(e.dataTransfer.files); } });
+document.addEventListener('paste', e => { const files = Array.from((e.clipboardData && e.clipboardData.files) || []); if (files.length) addFiles(files); });
+
+/* Texto del hero según la conversión elegida */
+function updateHero() {
+  const p = state.route && POPULAR_BY_ID[state.route];
+  if (p) {
+    const from = p[0].toUpperCase(), to = p[1] === 'extraer' ? '' : p[1].toUpperCase();
+    el.heroEyebrow.textContent = CATS[p.cat].label;
+    el.heroTitle.textContent = to ? `Convertir ${from} a ${to} gratis` : `Extraer archivos ${from} gratis`;
+    el.heroSub.textContent = to ? `Convierte tus archivos ${from} a ${to} en segundos, sin registro y sin subir nada a internet. La conversión se hace en tu navegador.` : `Descomprime archivos ${from} directamente en tu navegador y descarga su contenido.`;
+    document.title = (to ? `${from} a ${to}` : `Extraer ${from}`) + ' · Conversor Universal';
+  } else {
+    el.heroEyebrow.textContent = 'Conversor de archivos en línea';
+    el.heroTitle.textContent = 'Convierte cualquier archivo, gratis y sin subirlo a ningún servidor';
+    el.heroSub.textContent = 'Imágenes, audio, vídeo, documentos, hojas de cálculo, archivos comprimidos, fuentes y subtítulos. Todo se procesa en tu navegador: tus archivos nunca salen de tu dispositivo.';
+    document.title = 'Conversor Universal';
+  }
+}
+function applyRoute(hash) {
+  const id = String(hash || '').replace(/^#/, ''); const p = POPULAR_BY_ID[id]; if (!p) return false;
+  state.category = p.cat; state.target = p.target; state.route = id;
+  renderTargets(); if (el.targetSelect.value !== p.target) { state.target = p.target; el.targetSelect.value = p.target; }
+  updateHero(); return true;
+}
+window.addEventListener('hashchange', () => { if (applyRoute(location.hash)) el.dropzone.scrollIntoView({ block: 'center' }); });
+
+/* Conversores populares */
+function renderTiles(filter) {
+  const q = (filter || '').toLowerCase().replace(/\s+a\s+/g, ' ').trim();
+  const arrow = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+  const items = POPULAR.filter(p => !q || (p[0] + ' ' + p[1] + ' ' + CATS[p.cat].label).toLowerCase().includes(q) || q.split(/\s+/).every(w => (p[0] + ' ' + p[1]).includes(w)));
+  el.tiles.innerHTML = items.map(p => `<button class="tile" type="button" data-route="${p.id}"><span class="tile-pair">${esc(p[0].toUpperCase())}${arrow}${esc(p[1] === 'extraer' ? 'Extraer' : p[1].toUpperCase())}</span><span class="tile-cat">${ICON[p.cat]}${esc(CATS[p.cat].label)}</span></button>`).join('');
+  el.tilesEmpty.hidden = items.length > 0;
+}
+el.tiles.addEventListener('click', e => { const b = e.target.closest('[data-route]'); if (!b) return; if (location.hash === '#' + b.dataset.route) { applyRoute(b.dataset.route); el.dropzone.scrollIntoView({ block: 'center' }); } else location.hash = b.dataset.route; });
+el.tileSearch.addEventListener('input', () => renderTiles(el.tileSearch.value));
+
+/* Tabla de formatos */
+function renderCats() {
+  let total = new Set();
+  el.catList.innerHTML = Object.entries(CATS).map(([k, c]) => {
+    c.inputs.forEach(i => total.add(i)); c.outputs.forEach(o => { if (o.ext) total.add(o.ext); });
+    const outs = c.outputs.map(o => `<span class="chip out">${esc(o.label)}</span>`).join('');
+    return `<details><summary>${ICON[k]}${esc(c.label)}<span class="count">${c.inputs.length} entradas · ${c.outputs.length} salidas</span></summary><div class="cat-body"><h4>Puedes subir</h4><div class="chips">${c.inputs.map(i => `<span class="chip">.${esc(i)}</span>`).join('')}</div><h4>Puedes obtener</h4><div class="chips">${outs}<span class="chip out">ZIP</span><span class="chip out">TAR.GZ</span><span class="chip out">Base64</span></div></div></details>`;
+  }).join('');
+  el.factFormats.textContent = 'Más de ' + (Math.floor(total.size / 10) * 10) + ' formatos';
+}
+
+/* 7) Orquestación de la conversión */
+function setBar(p) { const pct = Math.round(clamp(p, 0, 1) * 100); el.barFill.style.width = pct + '%'; el.progPct.textContent = pct + ' %'; el.bar.setAttribute('aria-valuenow', pct); }
+function makeCtx() {
+  let base = 0, span = 1;
+  return {
+    setItem(name, i, n) { i = i || 0; n = n || 1; base = i / n; span = 1 / n; el.progName.textContent = name; el.progStatus.textContent = ''; setBar(base); },
+    progress(p) { setBar(base + span * clamp(p, 0, 1)); },
+    status(t) { el.progStatus.textContent = t; },
+    log(t) { console.log('[conversor]', t); }
+  };
+}
+function hideResults() { state.results.forEach(r => { if (r.url) URL.revokeObjectURL(r.url); }); state.results = []; el.results.hidden = true; el.resultList.innerHTML = ''; }
+function setBusyUI(b) { el.convertBtn.disabled = b; el.convertBtn.textContent = b ? 'Convirtiendo…' : 'Convertir'; el.cancelBtn.hidden = !b; el.targetSelect.disabled = b; el.dropzone.style.pointerEvents = b ? 'none' : ''; }
+async function runTarget(target, items, opts, ctx) {
+  if (target.universal) return engineUniversal(target, items, opts, ctx);
+  const engine = { image: engineImage, audio: engineAudio, video: engineVideo, document: engineDocument, data: engineData, archive: engineArchive, font: engineFont, subtitle: engineSubtitle }[state.category];
+  return engine(target, items, opts, ctx);
+}
+async function convertAll() {
+  if (state.busy) return;
+  const target = getTargetDef(); if (!target) { toast('Elige un formato de salida.', 'warn'); return; }
+  if (!state.files.length) { toast('Añade al menos un archivo.', 'warn'); el.dropzone.focus(); return; }
+  const eligible = state.files.filter(x => target.universal ? true : x.cat === state.category);
+  const skipped = state.files.length - eligible.length;
+  if (!eligible.length) { toast('Ninguno de los archivos es compatible con la salida elegida.', 'warn'); return; }
+  state.busy = true; state.cancel = false; hideResults(); el.progress.hidden = false; setBusyUI(true);
+  state.files.forEach(x => { x.status = ''; x.error = ''; }); renderFiles();
+  const opts = collectOpts(target); const ctx = makeCtx(); const results = []; let errors = 0;
+  try {
+    if (target.batch) {
+      ctx.setItem(eligible.length === 1 ? eligible[0].name : `${eligible.length} archivos`);
+      eligible.forEach(x => markFile(x.id, 'working'));
+      try { results.push(...await runTarget(target, eligible, opts, ctx)); eligible.forEach(x => markFile(x.id, 'done')); }
+      catch (e) { console.error(e); errors = eligible.length; eligible.forEach(x => markFile(x.id, 'error', e.message || String(e))); if (!state.cancel) toast(e.message || String(e), 'danger'); }
+    } else {
+      for (let i = 0; i < eligible.length; i++) {
+        if (state.cancel) break;
+        const x = eligible[i]; ctx.setItem(x.name, i, eligible.length); markFile(x.id, 'working');
+        try { results.push(...await runTarget(target, [x], opts, ctx)); markFile(x.id, 'done'); }
+        catch (e) { console.error(e); errors++; markFile(x.id, 'error', e.message || String(e)); }
+      }
+    }
+  } finally { state.busy = false; setBusyUI(false); el.progress.hidden = true; }
+  state.results = results.map(r => ({ ...r, id: uid(), url: URL.createObjectURL(r.blob) }));
+  renderResults(skipped, errors);
+}
+el.convertBtn.addEventListener('click', convertAll);
+el.cancelBtn.addEventListener('click', () => { state.cancel = true; el.cancelBtn.disabled = true; setTimeout(() => { el.cancelBtn.disabled = false; }, 1500); if (FF.inst) { try { FF.inst.terminate(); } catch (_) {} FF.inst = null; FF.loading = null; } toast('Conversión cancelada.'); });
+el.resetBtn.addEventListener('click', () => { state.files = []; hideResults(); renderFiles(); renderTargets(); el.dropzone.scrollIntoView({ block: 'center' }); });
+
+function renderResults(skipped, errors) {
+  const rs = state.results;
+  el.results.hidden = false;
+  el.resultsTitle.textContent = rs.length === 1 ? 'Archivo convertido' : `${rs.length} archivos convertidos`;
+  const notes = [];
+  if (skipped) notes.push(`${skipped} archivo(s) se omitieron porque no pertenecen a la categoría elegida.`);
+  if (errors) notes.push(`${errors} archivo(s) no se pudieron convertir; revisa el mensaje junto a cada uno.`);
+  el.resultsNote.hidden = !notes.length; el.resultsNote.textContent = notes.join(' ');
+  el.downloadAll.hidden = rs.length < 2;
+  el.resultList.innerHTML = rs.map(r => {
+    const isImg = r.blob.type.startsWith('image/') && r.blob.type !== 'image/tiff' && r.blob.type !== 'image/x-icon';
+    const thumb = isImg ? `<span class="thumb"><img src="${r.url}" alt=""></span>` : `<span class="thumb"><span class="file-ext">${esc(extOf(r.name) || 'bin')}</span></span>`;
+    return `<li class="result-row"><div>${thumb}</div><div><div class="file-name" title="${esc(r.name)}">${esc(r.name)}</div><div class="file-meta">${fmtBytes(r.blob.size)}</div></div><button class="btn btn-primary btn-sm" type="button" data-download="${r.id}">Descargar</button></li>`;
+  }).join('');
+  if (rs.length) el.results.scrollIntoView({ block: 'start', behavior: 'smooth' });
+  if (!rs.length && !errors && !skipped) toast('No se generó ningún archivo.', 'warn');
+}
+el.resultList.addEventListener('click', e => { const b = e.target.closest('[data-download]'); if (!b) return; const r = state.results.find(x => x.id === b.dataset.download); if (r) saveFile(r.name, r.blob); });
+el.downloadAll.addEventListener('click', async () => {
+  try { el.downloadAll.disabled = true; await loadScript(LIB.jszip); const zip = new JSZip(); const used = {}; state.results.forEach(r => { let n = r.name; while (used[n]) { n = baseOf(r.name) + '-' + (++used[r.name] || (used[r.name] = 2)) + (extOf(r.name) ? '.' + extOf(r.name) : ''); } used[n] = 1; zip.file(n, r.blob); }); const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } }); await saveFile('convertidos.zip', blob); }
+  catch (e) { toast('No se pudo crear el ZIP: ' + e.message, 'danger'); } finally { el.downloadAll.disabled = false; }
+});
+
+/* 8) Descargas (navegador normal o visor de artifacts de Claude) */
+let _claudeDl;
+function getClaudeDownloads() { if (_claudeDl === undefined) _claudeDl = (window.claude && typeof window.claude.use === 'function') ? window.claude.use('downloads').catch(() => null) : Promise.resolve(null); return _claudeDl; }
+async function saveFile(name, blob) {
+  const dl = await getClaudeDownloads();
+  if (dl) {
+    try { await dl.save({ filename: name, data: blob }); toast('Archivo guardado.', 'ok'); }
+    catch (e) {
+      if (e && e.code === 'rejected_extension') {
+        try { await loadScript(LIB.jszip); const z = new JSZip(); z.file(name, blob); const zb = await z.generateAsync({ type: 'blob' }); await dl.save({ filename: baseOf(name) + '.zip', data: zb }); toast('Este visor no admite esa extensión: se guardó dentro de un ZIP.', 'ok'); }
+        catch (e2) { if (!e2 || e2.code !== 'declined') toast('No se pudo guardar: ' + ((e2 && (e2.message || e2.code)) || e2), 'danger'); }
+      } else if (!e || e.code !== 'declined') toast('No se pudo guardar: ' + ((e && (e.message || e.code)) || e), 'danger');
+    }
+    return;
+  }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.rel = 'noopener'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 60000);
+}
+
+/* 9) Motor de imágenes */
+async function loadViaImg(blob) { const url = URL.createObjectURL(blob); try { const img = new Image(); img.src = url; await img.decode(); const c = makeCanvas(img.naturalWidth, img.naturalHeight); c.getContext('2d').drawImage(img, 0, 0); return c; } finally { URL.revokeObjectURL(url); } }
+function imageDataToCanvas(d) { const c = makeCanvas(d.width, d.height); c.getContext('2d').putImageData(d instanceof ImageData ? d : new ImageData(new Uint8ClampedArray(d.data.buffer || d.data), d.width, d.height), 0, 0); return c; }
+function targetSize(w, h, resize) {
+  if (!resize || resize === 'orig') return [w, h];
+  if (resize[0] === 'p') { const f = Number(resize.slice(1)) / 100; return [Math.max(1, Math.round(w * f)), Math.max(1, Math.round(h * f))]; }
+  if (resize[0] === 'w') { const m = Number(resize.slice(1)); const s = Math.min(1, m / Math.max(w, h)); return [Math.max(1, Math.round(w * s)), Math.max(1, Math.round(h * s))]; }
+  return [w, h];
+}
+async function rasterizeSvg(file, opts) {
+  const text = await file.text(); const doc = new DOMParser().parseFromString(text, 'image/svg+xml'); const root = doc.documentElement;
+  if (root.nodeName !== 'svg' || doc.querySelector('parsererror')) throw new Error('El SVG no es válido o está dañado.');
+  let w = parseFloat(root.getAttribute('width')), h = parseFloat(root.getAttribute('height')); const vb = (root.getAttribute('viewBox') || '').trim().split(/[\s,]+/).map(Number);
+  const ratio = vb.length === 4 && vb[2] > 0 && vb[3] > 0 ? vb[3] / vb[2] : (w > 0 && h > 0 ? h / w : 1);
+  if (!(w > 0) && !(h > 0)) { w = vb.length === 4 && vb[2] > 0 ? Math.max(vb[2], 1024) : 1024; h = w * ratio; } else if (!(w > 0)) w = h / ratio; else if (!(h > 0)) h = w * ratio;
+  if (!root.getAttribute('viewBox') && w > 0 && h > 0) root.setAttribute('viewBox', `0 0 ${w} ${h}`);
+  const [tw, th] = targetSize(w, h, opts && opts.resize);
+  root.setAttribute('width', String(tw)); root.setAttribute('height', String(th));
+  const blob = new Blob([new XMLSerializer().serializeToString(doc)], { type: 'image/svg+xml' });
+  const c = await loadViaImg(blob); c._sized = true; return c;
+}
+async function decodeToCanvas(file, ext, opts) {
+  if (ext === 'svg') return rasterizeSvg(file, opts);
+  if (ext === 'heic' || ext === 'heif') { await loadScript(LIB.heic2any); let out = await heic2any({ blob: file, toType: 'image/png' }); if (Array.isArray(out)) out = out[0]; return loadViaImg(out); }
+  if (ext === 'tif' || ext === 'tiff') {
+    await loadScript(LIB.pako); await loadScript(LIB.utif); const buf = await file.arrayBuffer(); const ifds = UTIF.decode(buf); if (!ifds.length) throw new Error('El TIFF no contiene imágenes.');
+    UTIF.decodeImage(buf, ifds[0]); const rgba = UTIF.toRGBA8(ifds[0]); return imageDataToCanvas(new ImageData(new Uint8ClampedArray(rgba.buffer, rgba.byteOffset, rgba.byteLength), ifds[0].width, ifds[0].height));
+  }
+  try { const bmp = await createImageBitmap(file); const c = makeCanvas(bmp.width, bmp.height); c.getContext('2d').drawImage(bmp, 0, 0); if (bmp.close) bmp.close(); return c; } catch (_) {}
+  try { return await loadViaImg(file); } catch (_) {}
+  if (ext === 'avif' || ext === 'jxl') { const m = await loadModule(ext === 'avif' ? LIB.avif : LIB.jxl); const data = await m.decode(await file.arrayBuffer()); if (!data) throw new Error('No se pudo decodificar la imagen.'); return imageDataToCanvas(data); }
+  throw new Error('No se pudo leer la imagen. Puede estar dañada o en un formato que tu navegador no admite.');
+}
+function renderOutput(src, opts, alpha) {
+  const [w, h] = src._sized ? [src.width, src.height] : targetSize(src.width, src.height, opts.resize);
+  if (alpha && w === src.width && h === src.height) return src;
+  const c = makeCanvas(w, h); const ctx = c.getContext('2d');
+  if (!alpha) { ctx.fillStyle = opts.bg || '#ffffff'; ctx.fillRect(0, 0, w, h); }
+  ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high'; ctx.drawImage(src, 0, 0, w, h); return c;
+}
+async function encodeWebp(c, q) { let b = null; try { b = await canvasToBlob(c, 'image/webp', q); } catch (_) {} if (b && b.type === 'image/webp') return b; const m = await loadModule(LIB.webp); const buf = await m.encode(getImageData(c), { quality: Math.round(q * 100) }); return new Blob([buf], { type: 'image/webp' }); }
+async function encodeGif(d) { const m = await loadModule(LIB.gifenc); const GIFEncoder = m.GIFEncoder || m.default; const palette = m.quantize(d.data, 256); const index = m.applyPalette(d.data, palette); const gif = GIFEncoder(); gif.writeFrame(index, d.width, d.height, { palette }); gif.finish(); return new Blob([gif.bytes()], { type: 'image/gif' }); }
+function encodeBmp(d) {
+  const { width: w, height: h, data } = d; const rowSize = Math.floor((24 * w + 31) / 32) * 4; const pixelArraySize = rowSize * h; const fileSize = 54 + pixelArraySize;
+  const buf = new ArrayBuffer(fileSize); const dv = new DataView(buf); const u8 = new Uint8Array(buf);
+  dv.setUint8(0, 0x42); dv.setUint8(1, 0x4D); dv.setUint32(2, fileSize, true); dv.setUint32(10, 54, true); dv.setUint32(14, 40, true); dv.setInt32(18, w, true); dv.setInt32(22, h, true); dv.setUint16(26, 1, true); dv.setUint16(28, 24, true); dv.setUint32(30, 0, true); dv.setUint32(34, pixelArraySize, true); dv.setInt32(38, 2835, true); dv.setInt32(42, 2835, true);
+  for (let y = 0; y < h; y++) { let o = 54 + (h - 1 - y) * rowSize; let i = y * w * 4; for (let x = 0; x < w; x++, i += 4) { u8[o++] = data[i + 2]; u8[o++] = data[i + 1]; u8[o++] = data[i]; } }
+  return new Blob([buf], { type: 'image/bmp' });
+}
+async function encodeIco(src, sizes) {
+  const pngs = [];
+  for (const s of sizes) { const c = makeCanvas(s, s); const ctx = c.getContext('2d'); ctx.imageSmoothingQuality = 'high'; const sc = Math.min(s / src.width, s / src.height); const w = Math.max(1, Math.round(src.width * sc)), h = Math.max(1, Math.round(src.height * sc)); ctx.drawImage(src, Math.round((s - w) / 2), Math.round((s - h) / 2), w, h); pngs.push(new Uint8Array(await (await canvasToBlob(c, 'image/png')).arrayBuffer())); }
+  const headerSize = 6 + 16 * sizes.length; let total = headerSize; pngs.forEach(p => { total += p.length; });
+  const buf = new ArrayBuffer(total); const dv = new DataView(buf); const u8 = new Uint8Array(buf);
+  dv.setUint16(0, 0, true); dv.setUint16(2, 1, true); dv.setUint16(4, sizes.length, true); let off = headerSize;
+  sizes.forEach((s, i) => { const e = 6 + 16 * i; dv.setUint8(e, s >= 256 ? 0 : s); dv.setUint8(e + 1, s >= 256 ? 0 : s); dv.setUint8(e + 2, 0); dv.setUint8(e + 3, 0); dv.setUint16(e + 4, 1, true); dv.setUint16(e + 6, 32, true); dv.setUint32(e + 8, pngs[i].length, true); dv.setUint32(e + 12, off, true); u8.set(pngs[i], off); off += pngs[i].length; });
+  return new Blob([buf], { type: 'image/x-icon' });
+}
+async function engineImage(target, items, opts, ctx) {
+  const id = target.id;
+  if (id === 'pdf') return imagesToPdf(items, opts, ctx);
+  if (id === 'mp4' || id === 'webm') return engineVideo(target, items, opts, ctx);
+  const results = [];
+  for (const x of items) {
+    const base = baseOf(x.name);
+    if (id === 'ico') { const src = await decodeToCanvas(x.file, x.ext, {}); const sizes = opts.icoSize === 'multi' ? [16, 32, 48, 64, 128, 256] : [Number(opts.icoSize)]; results.push({ name: base + '.ico', blob: await encodeIco(src, sizes) }); continue; }
+    const alpha = !['jpg', 'bmp', 'gif'].includes(id);
+    const src = await decodeToCanvas(x.file, x.ext, opts); const c = renderOutput(src, opts, alpha); const q = clamp(Number(opts.quality) || 90, 10, 100) / 100;
+    let blob;
+    switch (id) {
+      case 'png': blob = await canvasToBlob(c, 'image/png'); break;
+      case 'jpg': blob = await canvasToBlob(c, 'image/jpeg', q); break;
+      case 'webp': blob = await encodeWebp(c, q); break;
+      case 'avif': { ctx.status('Codificando AVIF…'); const m = await loadModule(LIB.avif); const buf = await m.encode(getImageData(c), { quality: Math.round(q * 100), speed: 8 }); blob = new Blob([buf], { type: 'image/avif' }); break; }
+      case 'jxl': { ctx.status('Codificando JPEG XL…'); const m = await loadModule(LIB.jxl); const buf = await m.encode(getImageData(c), { quality: Math.round(q * 100) }); blob = new Blob([buf], { type: 'image/jxl' }); break; }
+      case 'gif': blob = await encodeGif(getImageData(c)); break;
+      case 'bmp': blob = encodeBmp(getImageData(c)); break;
+      case 'tiff': { await loadScript(LIB.pako); await loadScript(LIB.utif); const d = getImageData(c); blob = new Blob([UTIF.encodeImage(d.data.buffer, d.width, d.height)], { type: 'image/tiff' }); break; }
+      case 'svg': { const b64 = await blobToBase64(await canvasToBlob(c, 'image/png')); blob = new Blob([`<svg xmlns="http://www.w3.org/2000/svg" width="${c.width}" height="${c.height}" viewBox="0 0 ${c.width} ${c.height}"><image width="${c.width}" height="${c.height}" href="data:image/png;base64,${b64}"/></svg>`], { type: 'image/svg+xml' }); break; }
+      default: throw new Error('Salida no admitida: ' + id);
+    }
+    results.push({ name: base + '.' + target.ext, blob });
+  }
+  return results;
+}
+async function imagesToPdf(items, opts, ctx) {
+  await loadScript(LIB.pdflib); const { PDFDocument } = PDFLib;
+  const results = []; const combined = opts.pdfCombine ? await PDFDocument.create() : null;
+  for (let i = 0; i < items.length; i++) {
+    const x = items[i]; ctx.setItem(x.name, i, items.length);
+    const src = await decodeToCanvas(x.file, x.ext, opts); const c = renderOutput(src, opts, false);
+    const photo = ['jpg', 'jpeg', 'jfif', 'heic', 'heif', 'avif', 'tif', 'tiff'].includes(x.ext);
+    const bytes = new Uint8Array(await (await canvasToBlob(c, photo ? 'image/jpeg' : 'image/png', 0.92)).arrayBuffer());
+    const d = combined || await PDFDocument.create(); const img = photo ? await d.embedJpg(bytes) : await d.embedPng(bytes);
+    const pw = c.width * 0.75, ph = c.height * 0.75; let page, dw, dh, dx, dy;
+    if (opts.pdfPage === 'fit') { page = d.addPage([pw, ph]); dw = pw; dh = ph; dx = 0; dy = 0; }
+    else { const size = { a4: [595.28, 841.89], a4l: [841.89, 595.28], letter: [612, 792] }[opts.pdfPage] || [595.28, 841.89]; page = d.addPage(size); const m = 36; const s = Math.min((size[0] - 2 * m) / pw, (size[1] - 2 * m) / ph); dw = pw * s; dh = ph * s; dx = (size[0] - dw) / 2; dy = (size[1] - dh) / 2; }
+    page.drawImage(img, { x: dx, y: dy, width: dw, height: dh });
+    if (!combined) results.push({ name: baseOf(x.name) + '.pdf', blob: new Blob([await d.save()], { type: 'application/pdf' }) });
+  }
+  if (combined) results.push({ name: (items.length === 1 ? baseOf(items[0].name) : 'imagenes') + '.pdf', blob: new Blob([await combined.save()], { type: 'application/pdf' }) });
+  return results;
+}
+
+/* 10) Motor de audio (ruta rápida nativa + FFmpeg) */
+async function decodeAudio(file) { const AC = window.AudioContext || window.webkitAudioContext; if (!AC) throw new Error('Sin Web Audio'); const ac = new AC(); try { return await ac.decodeAudioData(await file.arrayBuffer()); } finally { ac.close(); } }
+function f32ToI16(f) { const out = new Int16Array(f.length); for (let i = 0; i < f.length; i++) { const v = Math.max(-1, Math.min(1, f[i])); out[i] = v < 0 ? v * 32768 : v * 32767; } return out; }
+function encodeWav(ab) {
+  const ch = ab.numberOfChannels, sr = ab.sampleRate, n = ab.length; const buf = new ArrayBuffer(44 + n * ch * 2); const dv = new DataView(buf);
+  const ws = (o, s) => { for (let i = 0; i < s.length; i++) dv.setUint8(o + i, s.charCodeAt(i)); };
+  ws(0, 'RIFF'); dv.setUint32(4, 36 + n * ch * 2, true); ws(8, 'WAVE'); ws(12, 'fmt '); dv.setUint32(16, 16, true); dv.setUint16(20, 1, true); dv.setUint16(22, ch, true); dv.setUint32(24, sr, true); dv.setUint32(28, sr * ch * 2, true); dv.setUint16(32, ch * 2, true); dv.setUint16(34, 16, true); ws(36, 'data'); dv.setUint32(40, n * ch * 2, true);
+  const chans = []; for (let c = 0; c < ch; c++) chans.push(ab.getChannelData(c));
+  let o = 44; for (let i = 0; i < n; i++) for (let c = 0; c < ch; c++) { const v = Math.max(-1, Math.min(1, chans[c][i])); dv.setInt16(o, v < 0 ? v * 32768 : v * 32767, true); o += 2; }
+  return new Blob([buf], { type: 'audio/wav' });
+}
+async function encodeMp3(ab, kbps, ctx) {
+  await loadScript(LIB.lamejs);
+  const ch = Math.min(2, ab.numberOfChannels); const enc = new lamejs.Mp3Encoder(ch, ab.sampleRate, kbps);
+  const l = f32ToI16(ab.getChannelData(0)); const r = ch === 2 ? f32ToI16(ab.getChannelData(1)) : null; const chunks = []; const BS = 1152;
+  for (let i = 0, k = 0; i < l.length; i += BS, k++) { const lc = l.subarray(i, i + BS); const out = ch === 2 ? enc.encodeBuffer(lc, r.subarray(i, i + BS)) : enc.encodeBuffer(lc); if (out.length) chunks.push(new Int8Array(out)); if (k % 300 === 0) { ctx.progress(i / l.length); await yieldUI(); } }
+  const end = enc.flush(); if (end.length) chunks.push(new Int8Array(end));
+  return new Blob(chunks, { type: 'audio/mpeg' });
+}
+async function engineAudio(target, items, opts, ctx) {
+  const results = [];
+  for (const x of items) {
+    const base = baseOf(x.name);
+    if ((target.id === 'wav' || target.id === 'mp3') && x.size < 80 * 1024 * 1024) {
+      try {
+        ctx.status('Decodificando audio…'); const ab = await decodeAudio(x.file);
+        if (target.id === 'wav') { results.push({ name: base + '.wav', blob: encodeWav(ab) }); continue; }
+        ctx.status('Codificando MP3…'); results.push({ name: base + '.mp3', blob: await encodeMp3(ab, Number(opts.bitrate) || 192, ctx) }); continue;
+      } catch (e) { ctx.log('Ruta rápida no disponible (' + (e.message || e) + '); usando FFmpeg.'); }
+    }
+    results.push(await ffmpegConvert(x, target, opts, ctx));
+  }
+  return results;
+}
+
+/* 11) Motor de vídeo y audio avanzado: FFmpeg (WebAssembly) */
+const FF = { inst: null, loading: null, logs: [], onProgress: null };
+async function fetchAsBlobURL(url, mime, onProgress) {
+  const res = await fetch(url); if (!res.ok) throw new Error('HTTP ' + res.status + ' al descargar ' + url);
+  const total = Number(res.headers.get('content-length')) || 0;
+  if (!res.body || !onProgress) return URL.createObjectURL(new Blob([await res.arrayBuffer()], { type: mime }));
+  const reader = res.body.getReader(); const chunks = []; let got = 0;
+  for (;;) { const { done, value } = await reader.read(); if (done) break; chunks.push(value); got += value.length; if (total) onProgress(Math.min(1, got / total)); }
+  return URL.createObjectURL(new Blob(chunks, { type: mime }));
+}
+async function getFFmpeg(ctx) {
+  if (FF.inst) return FF.inst;
+  if (!FF.loading) FF.loading = (async () => {
+    ctx.status('Descargando el motor de vídeo (unos 31 MB, solo la primera vez)…');
+    await loadScript(LIB.ffmpeg);
+    const { FFmpeg } = window.FFmpegWASM; const ff = new FFmpeg();
+    ff.on('log', ({ message }) => { FF.logs.push(message); if (FF.logs.length > 60) FF.logs.shift(); });
+    ff.on('progress', ({ progress }) => { if (FF.onProgress) FF.onProgress(progress); });
+    const [classWorkerURL, coreURL, wasmURL] = await Promise.all([
+      fetchAsBlobURL(LIB.ffmpegWorker, 'text/javascript'),
+      fetchAsBlobURL(LIB.ffmpegCore, 'text/javascript'),
+      fetchAsBlobURL(LIB.ffmpegWasm, 'application/wasm', p => ctx.status(`Descargando el motor de vídeo… ${Math.round(p * 100)} %`))
+    ]);
+    ctx.status('Iniciando el motor de vídeo…');
+    await ff.load({ classWorkerURL, coreURL, wasmURL });
+    FF.inst = ff; return ff;
+  })().catch(e => { FF.loading = null; throw new Error('No se pudo cargar el motor de vídeo y audio (FFmpeg). En este entorno puede estar bloqueada la descarga; en tu sitio web funciona con normalidad. Detalle: ' + (e.message || e)); });
+  return FF.loading;
+}
+function buildFfmpegArgs(inName, outName, id, opts, x) {
+  const vres = opts.videoRes || 'orig';
+  const scale = vres === 'orig' ? 'scale=trunc(iw/2)*2:trunc(ih/2)*2' : `scale=-2:trunc(min(${vres}\\,ih)/2)*2`;
+  const q = opts.videoQ || 'media'; const crf = { alta: '18', media: '23', baja: '30' }[q]; const vpx = { alta: '4M', media: '2M', baja: '1M' }[q]; const mpeg4q = { alta: '3', media: '5', baja: '8' }[q];
+  const br = (opts.bitrate || '192') + 'k';
+  const audio = codec => opts.mute ? ['-an'] : ['-c:a', codec, '-b:a', br];
+  const fast = opts.videoFast !== false && vres === 'orig' && x.ext !== 'gif';
+  const A = [];
+  switch (id) {
+    case 'mp4': case 'mov': case 'mkv':
+      if (fast) A.push({ label: 'Intentando copiar sin recodificar…', args: ['-i', inName, '-map', '0:v:0', '-map', '0:a?', '-c', 'copy', ...(opts.mute ? ['-an'] : []), ...(id !== 'mkv' ? ['-movflags', '+faststart'] : []), outName] });
+      A.push({ label: 'Recodificando vídeo (H.264)…', args: ['-i', inName, '-vf', scale, '-c:v', 'libx264', '-preset', 'veryfast', '-crf', crf, '-pix_fmt', 'yuv420p', ...audio('aac'), ...(id !== 'mkv' ? ['-movflags', '+faststart'] : []), outName] });
+      break;
+    case 'webm':
+      if (fast) A.push({ label: 'Intentando copiar sin recodificar…', args: ['-i', inName, '-map', '0:v:0', '-map', '0:a?', '-c', 'copy', ...(opts.mute ? ['-an'] : []), outName] });
+      A.push({ label: 'Recodificando vídeo (VP8)…', args: ['-i', inName, '-vf', scale, '-c:v', 'libvpx', '-b:v', vpx, '-deadline', 'realtime', '-cpu-used', '8', ...audio('libvorbis'), outName] });
+      break;
+    case 'avi': A.push({ label: 'Recodificando vídeo (MPEG-4)…', args: ['-i', inName, '-vf', scale, '-c:v', 'mpeg4', '-q:v', mpeg4q, ...audio('libmp3lame'), outName] }); break;
+    case 'gif': { const fps = opts.gifFps || '12'; const w = opts.gifWidth || '480'; const sc = w === 'orig' ? '' : `scale=${w}:-1:flags=lanczos,`; A.push({ label: 'Generando GIF con paleta optimizada…', args: ['-i', inName, '-vf', `fps=${fps},${sc}split[s0][s1];[s0]palettegen=stats_mode=diff[p];[s1][p]paletteuse=dither=bayer:bayer_scale=5:diff_mode=rectangle`, '-loop', '0', outName] }); break; }
+    case 'mp3': A.push({ label: 'Codificando MP3…', args: ['-i', inName, '-vn', '-c:a', 'libmp3lame', '-b:a', br, outName] }); break;
+    case 'wav': A.push({ label: 'Convirtiendo a WAV…', args: ['-i', inName, '-vn', '-c:a', 'pcm_s16le', outName] }); break;
+    case 'm4a': A.push({ label: 'Codificando AAC…', args: ['-i', inName, '-vn', '-c:a', 'aac', '-b:a', br, outName] }); break;
+    case 'ogg': A.push({ label: 'Codificando Vorbis…', args: ['-i', inName, '-vn', '-c:a', 'libvorbis', '-b:a', br, outName] }); break;
+    case 'opus': A.push({ label: 'Codificando Opus…', args: ['-i', inName, '-vn', '-c:a', 'libopus', '-b:a', br, outName] }); break;
+    case 'flac': A.push({ label: 'Codificando FLAC…', args: ['-i', inName, '-vn', '-c:a', 'flac', outName] }); break;
+    case 'aiff': A.push({ label: 'Convirtiendo a AIFF…', args: ['-i', inName, '-vn', '-c:a', 'pcm_s16be', outName] }); break;
+    default: throw new Error('Salida no admitida: ' + id);
+  }
+  return A;
+}
+async function ffmpegConvert(x, target, opts, ctx) {
+  const ff = await getFFmpeg(ctx);
+  const inName = 'in_' + x.id + '.' + (x.ext || 'bin'); const outName = 'out_' + x.id + '.' + target.ext;
+  ctx.status('Leyendo el archivo…');
+  await ff.writeFile(inName, new Uint8Array(await x.file.arrayBuffer()));
+  const attempts = buildFfmpegArgs(inName, outName, target.id, opts, x);
+  FF.onProgress = p => ctx.progress(p);
+  let out = null, lastErr = '';
+  try {
+    for (const a of attempts) {
+      if (state.cancel) throw new Error('Cancelado');
+      ctx.status(a.label); FF.logs = [];
+      const code = await ff.exec(['-y', '-hide_banner', '-nostdin', ...a.args]);
+      if (code === 0) { try { const data = await ff.readFile(outName); if (data && data.length > 0) { out = data; break; } } catch (_) {} }
+      lastErr = FF.logs.filter(l => /error|invalid|not supported|could not|unable|does not contain/i.test(l)).slice(-2).join(' · ') || FF.logs.slice(-2).join(' · ');
+      try { await ff.deleteFile(outName); } catch (_) {}
+    }
+  } finally {
+    FF.onProgress = null;
+    if (FF.inst) { try { await ff.deleteFile(inName); } catch (_) {} if (out) { try { await ff.deleteFile(outName); } catch (_) {} } }
+  }
+  if (!out) throw new Error('FFmpeg no pudo convertir este archivo.' + (lastErr ? ' Detalle: ' + lastErr.slice(0, 220) : ''));
+  return { name: baseOf(x.name) + '.' + target.ext, blob: new Blob([out.buffer], { type: MIME[target.ext] || 'application/octet-stream' }) };
+}
+async function engineVideo(target, items, opts, ctx) { const results = []; for (const x of items) results.push(await ffmpegConvert(x, target, opts, ctx)); return results; }
+
+/* 12) Motor de documentos: todo pasa por HTML intermedio */
+async function getPdfjs() { await loadScript(LIB.pdfjs); window.pdfjsLib.GlobalWorkerOptions.workerSrc = LIB.pdfjsWorker; return window.pdfjsLib; }
+function textToHtml(text, mergeLines) {
+  const blocks = String(text).replace(/\r\n?/g, '\n').split(/\n[ \t]*\n+/);
+  return blocks.map(b => b.trim()).filter(Boolean).map(b => '<p>' + (mergeLines ? esc(b.replace(/\s*\n\s*/g, ' ')) : esc(b).replace(/\n/g, '<br>')) + '</p>').join('\n');
+}
+function sanitizeHtml(html) { const doc = new DOMParser().parseFromString(html, 'text/html'); doc.querySelectorAll('script,style,iframe,object,embed,link,meta,noscript,form,input,button,video,audio,canvas').forEach(e => e.remove()); doc.querySelectorAll('*').forEach(e => { for (const a of Array.from(e.attributes)) if (/^on/i.test(a.name)) e.removeAttribute(a.name); }); return doc.body.innerHTML; }
+function wrapHtml(body, title) { return `<!DOCTYPE html>\n<html lang="es">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<title>${esc(title)}</title>\n<style>body{max-width:820px;margin:2rem auto;padding:0 1rem;font-family:Georgia,'Times New Roman',serif;line-height:1.6;color:#1a1a1a}img{max-width:100%}table{border-collapse:collapse}td,th{border:1px solid #bbb;padding:4px 8px}pre{overflow:auto;background:#f4f4f4;padding:12px}</style>\n</head>\n<body>\n${body}\n</body>\n</html>\n`; }
+function htmlToText(html) {
+  const doc = new DOMParser().parseFromString(html, 'text/html'); doc.querySelectorAll('script,style,noscript').forEach(e => e.remove());
+  const BLOCK = new Set(['p', 'div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li', 'tr', 'hr', 'section', 'article', 'header', 'footer', 'blockquote', 'pre', 'table', 'ul', 'ol', 'dd', 'dt', 'figure', 'figcaption', 'nav', 'aside', 'main']);
+  let out = '';
+  const walk = n => {
+    if (n.nodeType === 3) { out += n.nodeValue.replace(/\s+/g, ' '); return; }
+    if (n.nodeType !== 1) return; const tag = n.tagName.toLowerCase();
+    if (tag === 'br') { out += '\n'; return; }
+    if (tag === 'li') out += '\n• '; else if (tag === 'td' || tag === 'th') out += '\t'; else if (BLOCK.has(tag)) out += '\n';
+    if (tag === 'pre') out += n.textContent; else n.childNodes.forEach(walk);
+    if (BLOCK.has(tag) && tag !== 'li') out += '\n'; if (/^h[1-6]$/.test(tag)) out += '\n';
+  };
+  walk(doc.body);
+  return out.replace(/[ \t]+\n/g, '\n').replace(/\n[ \t]+/g, '\n').replace(/\n{3,}/g, '\n\n').trim() + '\n';
+}
+async function htmlToMarkdown(html) {
+  await loadScript(LIB.turndown); const td = new TurndownService({ headingStyle: 'atx', codeBlockStyle: 'fenced', bulletListMarker: '-' });
+  td.addRule('tabla', { filter: 'table', replacement: (content, node) => { const rows = Array.from(node.querySelectorAll('tr')).map(tr => Array.from(tr.children).map(c => c.textContent.trim().replace(/\|/g, '\\|').replace(/\s+/g, ' '))); if (!rows.length) return ''; const w = Math.max(...rows.map(r => r.length)); const line = r => '| ' + Array.from({ length: w }, (_, i) => r[i] || '').join(' | ') + ' |'; return '\n\n' + line(rows[0]) + '\n| ' + Array(w).fill('---').join(' | ') + ' |\n' + rows.slice(1).map(line).join('\n') + '\n\n'; } });
+  return td.turndown(sanitizeHtml(html)).trim() + '\n';
+}
+async function htmlToPdf(html, title, ctx) {
+  try {
+    await loadScript(LIB.pdfmake); await loadScript(LIB.pdfmakeFonts); await loadScript(LIB.htmlToPdfmake);
+    const content = window.htmlToPdfmake(sanitizeHtml(html), { tableAutoSize: true });
+    const dd = { info: { title }, content, pageSize: 'A4', pageMargins: [48, 56, 48, 56], defaultStyle: { fontSize: 11, lineHeight: 1.3 } };
+    return await new Promise((res, rej) => { try { window.pdfMake.createPdf(dd).getBlob(b => b ? res(b) : rej(new Error('PDF vacío'))); } catch (e) { rej(e); } });
+  } catch (e) { if (ctx) ctx.log('pdfmake no disponible (' + (e.message || e) + '); usando html2pdf.'); return htmlToPdfRaster(html); }
+}
+async function htmlToPdfRaster(html) {
+  await loadScript(LIB.html2pdf);
+  const host = document.createElement('div'); host.className = 'pdf-host'; const inner = document.createElement('div'); inner.className = 'pdf-doc'; inner.innerHTML = sanitizeHtml(html); host.appendChild(inner); document.body.appendChild(host);
+  try { return await window.html2pdf().set({ margin: [12, 12, 12, 12], image: { type: 'jpeg', quality: 0.95 }, html2canvas: { scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff' }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }, pagebreak: { mode: ['css', 'legacy'] } }).from(inner).outputPdf('blob'); }
+  finally { host.remove(); }
+}
+async function htmlToDocx(html, title) {
+  await loadScript(LIB.docx);
+  const D = window.docx; const { Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell, WidthType, ExternalHyperlink, BorderStyle } = D;
+  const doc = new DOMParser().parseFromString(sanitizeHtml(html), 'text/html');
+  const BLOCK = new Set(['p', 'div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'pre', 'blockquote', 'table', 'hr', 'section', 'article', 'header', 'footer', 'figure', 'nav', 'aside', 'main', 'li']);
+  const children = [];
+  const inline = (node, style, skipLists) => {
+    const runs = [];
+    node.childNodes.forEach(n => {
+      if (n.nodeType === 3) { const t = n.nodeValue.replace(/\s+/g, ' '); if (t.trim() || runs.length) runs.push(new TextRun({ text: t, ...style })); return; }
+      if (n.nodeType !== 1) return; const tag = n.tagName.toLowerCase(); const s = { ...style };
+      if (skipLists && (tag === 'ul' || tag === 'ol')) return;
+      if (tag === 'b' || tag === 'strong') s.bold = true; if (tag === 'i' || tag === 'em') s.italics = true; if (tag === 'u') s.underline = {}; if (tag === 's' || tag === 'del' || tag === 'strike') s.strike = true; if (tag === 'code' || tag === 'kbd') s.font = 'Courier New'; if (tag === 'sup') s.superScript = true; if (tag === 'sub') s.subScript = true;
+      if (tag === 'br') { runs.push(new TextRun({ break: 1 })); return; }
+      if (tag === 'img') return;
+      if (tag === 'a' && n.getAttribute('href') && /^https?:/i.test(n.getAttribute('href'))) { runs.push(new ExternalHyperlink({ link: n.getAttribute('href'), children: inline(n, { ...s, style: 'Hyperlink' }, skipLists) })); return; }
+      runs.push(...inline(n, s, skipLists));
+    });
+    return runs;
+  };
+  const para = (runs, extra) => { if (!runs.length) return; children.push(new Paragraph({ children: runs, spacing: { after: 120 }, ...extra })); };
+  const block = el => {
+    const tag = el.tagName.toLowerCase();
+    if (/^h[1-6]$/.test(tag)) { children.push(new Paragraph({ heading: HeadingLevel['HEADING_' + tag[1]], children: inline(el, {}), spacing: { before: 200, after: 120 } })); return; }
+    if (tag === 'ul' || tag === 'ol') { let i = 0; Array.from(el.children).forEach(li => { if (li.tagName.toLowerCase() !== 'li') return; i++; const runs = inline(li, {}, true); if (runs.length) children.push(tag === 'ul' ? new Paragraph({ children: runs, bullet: { level: 0 } }) : new Paragraph({ children: [new TextRun(i + '. '), ...runs], indent: { left: 720, hanging: 360 } })); Array.from(li.children).filter(c => /^(ul|ol)$/i.test(c.tagName)).forEach(block); }); return; }
+    if (tag === 'pre') { el.textContent.replace(/\r/g, '').split('\n').forEach(line => children.push(new Paragraph({ children: [new TextRun({ text: line || ' ', font: 'Courier New', size: 18 })] }))); return; }
+    if (tag === 'blockquote') { const kids = Array.from(el.children).filter(c => BLOCK.has(c.tagName.toLowerCase())); if (kids.length) kids.forEach(block); else para(inline(el, { italics: true }), { indent: { left: 720 } }); return; }
+    if (tag === 'table') { const rows = Array.from(el.querySelectorAll('tr')).map(tr => new TableRow({ children: Array.from(tr.children).map(td => new TableCell({ children: [new Paragraph({ children: inline(td, td.tagName.toLowerCase() === 'th' ? { bold: true } : {}) })] })) })).filter(r => r); if (rows.length) { children.push(new Table({ rows, width: { size: 100, type: WidthType.PERCENTAGE } })); children.push(new Paragraph('')); } return; }
+    if (tag === 'hr') { children.push(new Paragraph({ border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: '999999', space: 1 } } })); return; }
+    if (tag === 'img' || tag === 'script' || tag === 'style') return;
+    const hasBlock = Array.from(el.children).some(c => BLOCK.has(c.tagName.toLowerCase()));
+    if (hasBlock) { el.childNodes.forEach(n => { if (n.nodeType === 1) { BLOCK.has(n.tagName.toLowerCase()) ? block(n) : para(inline(n, {})); } else if (n.nodeType === 3 && n.nodeValue.trim()) para([new TextRun(n.nodeValue.trim())]); }); }
+    else para(inline(el, {}));
+  };
+  doc.body.childNodes.forEach(n => { if (n.nodeType === 1) block(n); else if (n.nodeType === 3 && n.nodeValue.trim()) para([new TextRun(n.nodeValue.trim())]); });
+  if (!children.length) children.push(new Paragraph(''));
+  const d = new Document({ creator: 'Conversor Universal', title, sections: [{ children }] });
+  return Packer.toBlob(d);
+}
+function toXhtml(html) { const doc = new DOMParser().parseFromString(sanitizeHtml(html), 'text/html'); return new XMLSerializer().serializeToString(doc.body).replace(/^<body[^>]*>/, '').replace(/<\/body>$/, ''); }
+async function makeEpub(html, title) {
+  await loadScript(LIB.jszip); const zip = new JSZip(); const t = esc(title || 'Documento');
+  const id = 'urn:uuid:' + (window.crypto && crypto.randomUUID ? crypto.randomUUID() : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 3 | 8)).toString(16); }));
+  const xhtml = (body, extraHead) => `<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE html>\n<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops"><head><meta charset="utf-8"/><title>${t}</title>${extraHead || ''}</head><body>${body}</body></html>`;
+  zip.file('mimetype', 'application/epub+zip', { compression: 'STORE' });
+  zip.file('META-INF/container.xml', '<?xml version="1.0" encoding="UTF-8"?>\n<container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container"><rootfiles><rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/></rootfiles></container>');
+  zip.file('OEBPS/chapter1.xhtml', xhtml(toXhtml(html), '<style>body{font-family:serif;line-height:1.5}img{max-width:100%}</style>'));
+  zip.file('OEBPS/nav.xhtml', xhtml(`<nav epub:type="toc" id="toc"><h1>Contenido</h1><ol><li><a href="chapter1.xhtml">${t}</a></li></ol></nav>`));
+  zip.file('OEBPS/content.opf', `<?xml version="1.0" encoding="UTF-8"?>\n<package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="bookid"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/"><dc:identifier id="bookid">${id}</dc:identifier><dc:title>${t}</dc:title><dc:language>es</dc:language><meta property="dcterms:modified">${new Date().toISOString().replace(/\.\d+Z$/, 'Z')}</meta></metadata><manifest><item id="nav" href="nav.xhtml" media-type="application/xhtml+xml" properties="nav"/><item id="ch1" href="chapter1.xhtml" media-type="application/xhtml+xml"/></manifest><spine><itemref idref="ch1"/></spine></package>`);
+  return zip.generateAsync({ type: 'blob', mimeType: 'application/epub+zip' });
+}
+async function epubToHtml(file) {
+  await loadScript(LIB.jszip); const zip = await JSZip.loadAsync(file); const cf = zip.file('META-INF/container.xml'); if (!cf) throw new Error('El EPUB no es válido (falta container.xml).');
+  const container = new DOMParser().parseFromString(await cf.async('string'), 'application/xml'); const rf = container.getElementsByTagName('rootfile')[0]; const rootPath = rf && rf.getAttribute('full-path'); if (!rootPath || !zip.file(rootPath)) throw new Error('El EPUB no es válido (falta el archivo OPF).');
+  const opf = new DOMParser().parseFromString(await zip.file(rootPath).async('string'), 'application/xml'); const dir = rootPath.includes('/') ? rootPath.slice(0, rootPath.lastIndexOf('/') + 1) : '';
+  const items = {}; Array.from(opf.getElementsByTagName('item')).forEach(it => { items[it.getAttribute('id')] = it.getAttribute('href'); });
+  const spine = Array.from(opf.getElementsByTagName('itemref')).map(r => items[r.getAttribute('idref')]).filter(Boolean);
+  const titleEl = opf.getElementsByTagNameNS('http://purl.org/dc/elements/1.1/', 'title')[0]; let html = '';
+  for (const href of spine) { const f = zip.file(decodeURIComponent(dir + href)); if (!f) continue; const d = new DOMParser().parseFromString(await f.async('string'), 'text/html'); d.querySelectorAll('script,style,img,svg,video,audio,link').forEach(e => e.remove()); html += '<section>' + d.body.innerHTML + '</section>\n'; }
+  return { html, title: titleEl ? titleEl.textContent.trim() : '' };
+}
+async function odtToHtml(file) {
+  await loadScript(LIB.jszip); const zip = await JSZip.loadAsync(file); const f = zip.file('content.xml'); if (!f) throw new Error('El archivo ODT no es válido (falta content.xml).');
+  const doc = new DOMParser().parseFromString(await f.async('string'), 'application/xml');
+  const TEXT = 'urn:oasis:names:tc:opendocument:xmlns:text:1.0', OFFICE = 'urn:oasis:names:tc:opendocument:xmlns:office:1.0', TABLE = 'urn:oasis:names:tc:opendocument:xmlns:table:1.0', XLINK = 'http://www.w3.org/1999/xlink';
+  const body = doc.getElementsByTagNameNS(OFFICE, 'text')[0] || doc.documentElement;
+  const inline = n => { let s = ''; for (const c of n.childNodes) { if (c.nodeType === 3) s += esc(c.nodeValue); else if (c.nodeType === 1) { const ln = c.localName; if (ln === 's') s += ' '.repeat(Number(c.getAttributeNS(TEXT, 'c')) || 1); else if (ln === 'tab') s += '\t'; else if (ln === 'line-break') s += '<br>'; else if (ln === 'a') s += `<a href="${esc(c.getAttributeNS(XLINK, 'href') || '')}">${inline(c)}</a>`; else if (ln === 'note' || ln === 'tracked-changes') { } else s += inline(c); } } return s; };
+  const block = n => { let s = ''; for (const c of n.childNodes) { if (c.nodeType !== 1) continue; const ln = c.localName; if (ln === 'h') { const lvl = Math.min(6, Number(c.getAttributeNS(TEXT, 'outline-level')) || 1); s += `<h${lvl}>${inline(c)}</h${lvl}>\n`; } else if (ln === 'p') s += `<p>${inline(c)}</p>\n`; else if (ln === 'list') { s += '<ul>'; for (const li of c.childNodes) if (li.nodeType === 1 && li.localName === 'list-item') s += `<li>${block(li)}</li>`; s += '</ul>\n'; } else if (ln === 'table') { s += '<table>'; for (const row of c.getElementsByTagNameNS(TABLE, 'table-row')) { s += '<tr>'; for (const cell of row.childNodes) if (cell.nodeType === 1 && cell.localName === 'table-cell') s += `<td>${block(cell)}</td>`; s += '</tr>'; } s += '</table>\n'; } else if (ln === 'section' || ln === 'table-of-content' || ln === 'index-body') s += block(c); } return s; };
+  return block(body);
+}
+function rtfToText(rtf) {
+  const pattern = /\\([a-z]{1,32})(-?\d{1,10})?[ ]?|\\'([0-9a-f]{2})|\\([^a-z])|([{}])|[\r\n]+|(.)/gi;
+  const destinations = new Set('aftncn aftnsep aftnsepc annotation atnauthor atndate atnicn atnid atnparent atnref atntime atrfend atrfstart author background bkmkend bkmkstart blipuid buptim category colorschememapping colortbl comment company creatim datafield datastore defchp defpap do doccomm docvar dptxbxtext ebcend ebcstart factoidname falt fchars ffdeftext ffentrymcr ffexitmcr ffformat ffhelptext ffl ffname ffstattext field file filetbl fldinst fldrslt fldtype fname fontemb fontfile fonttbl footer footerf footerl footerr footnote formfield ftncn ftnsep ftnsepc g generator gridtbl header headerf headerl headerr hl hlfr hlinkbase hlloc hlsrc hsv htmltag info keycode keywords latentstyles lchars levelnumbers leveltext lfolevel linkval list listlevel listname listoverride listoverridetable listpicture liststylename listtable listtext lsdlockedexcept macc maccPr mailmerge maln malnScr manager margPr mbar mbarPr mbaseJc mbegChr mborderBox mborderBoxPr mbox mboxPr mchr mcount mctrlPr md mdeg mdegHide mden mdiff mdPr me mendChr meqArr meqArrPr mf mfName mfPr mfunc mfuncPr mgroupChr mgroupChrPr mgrow mhideBot mhideLeft mhideRight mhideTop mhtmltag mlim mlimloc mlimlow mlimlowPr mlimupp mlimuppPr mm mmaddfieldname mmath mmathPict mmathPr mmaxdist mmc mmcJc mmconnectstr mmconnectstrdata mmcPr mmcs mmdatasource mmheadersource mmmailsubject mmodso mmodsofilter mmodsofldmpdata mmodsomappedname mmodsoname mmodsorecipdata mmodsosort mmodsosrc mmodsotable mmodsoudl mmodsoudldata mmodsouniquetag mmPr mmquery mmr mnary mnaryPr mnoBreak mnum mobjDist moMath moMathPara moMathParaPr mopEmu mphant mphantPr mplcHide mpos mr mrad mradPr mrPr msepChr mshow mshp msPre msPrePr msSub msSubPr msSubSup msSubSupPr msSup msSupPr mstrikeBLTR mstrikeH mstrikeTLBR mstrikeV msub msubHide msup msupHide mtransp mtype mvertJc mvfmf mvfml mvtof mvtol mzeroAsc mzeroDesc mzeroWid nesttableprops nextfile nonesttables objalias objclass objdata object objname objsect objtime oldcprops oldpprops oldsprops oldtprops oleclsid operator panose password passwordhash pgp pgptbl picprop pict pn pnseclvl pntext pntxta pntxtb printim private propname protend protstart protusertbl pxe result revtbl revtim rsidtbl rxe shp shpgrp shpinst shppict shprslt shptxt sn sp staticval stylesheet subject sv svb tc template themedata title txe ud upr userprops wgrffmtfilter windowcaption writereservation writereservhash xe xform xmlattrname xmlattrvalue xmlclose xmlname xmlnstbl xmlopen'.split(' '));
+  const special = { par: '\n', sect: '\n\n', page: '\n\n', line: '\n', tab: '\t', emdash: '—', endash: '–', emspace: ' ', enspace: ' ', qmspace: ' ', bullet: '•', lquote: '‘', rquote: '’', ldblquote: '“', rdblquote: '”' };
+  const cp = new TextDecoder('windows-1252'); const stack = []; let ignorable = false, ucskip = 1, curskip = 0; const out = []; let m;
+  while ((m = pattern.exec(rtf)) !== null) {
+    const word = m[1], arg = m[2], hex = m[3], ch = m[4], brace = m[5], tchar = m[6];
+    if (brace) { curskip = 0; if (brace === '{') stack.push([ucskip, ignorable]); else { const s = stack.pop() || [1, false]; ucskip = s[0]; ignorable = s[1]; } }
+    else if (ch !== undefined) { curskip = 0; if (ch === '~') { if (!ignorable) out.push(' '); } else if ('{}\\'.includes(ch)) { if (!ignorable) out.push(ch); } else if (ch === '*') ignorable = true; }
+    else if (word !== undefined) { curskip = 0; if (destinations.has(word)) ignorable = true; else if (ignorable) { } else if (special[word] !== undefined) out.push(special[word]); else if (word === 'uc') ucskip = parseInt(arg, 10) || 1; else if (word === 'u') { let c = parseInt(arg, 10); if (c < 0) c += 0x10000; out.push(String.fromCharCode(c)); curskip = ucskip; } }
+    else if (hex !== undefined) { if (curskip > 0) curskip--; else if (!ignorable) out.push(cp.decode(new Uint8Array([parseInt(hex, 16)]))); }
+    else if (tchar !== undefined) { if (curskip > 0) curskip--; else if (!ignorable) out.push(tchar); }
+  }
+  return out.join('');
+}
+async function pdfToText(file, ctx) {
+  const pdfjs = await getPdfjs(); const pdf = await pdfjs.getDocument({ data: new Uint8Array(await file.arrayBuffer()) }).promise; let text = '';
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i); const tc = await page.getTextContent(); let line = '', pageText = '';
+    for (const it of tc.items) { if (typeof it.str !== 'string') continue; line += it.str; if (it.hasEOL) { pageText += line.trimEnd() + '\n'; line = ''; } else if (it.str && !/\s$/.test(it.str)) line += ' '; }
+    if (line.trim()) pageText += line.trimEnd() + '\n';
+    text += pageText.trim() + '\n\n'; if (ctx) ctx.progress(i / pdf.numPages);
+  }
+  return text;
+}
+async function docToHtml(x, ctx) {
+  const ext = x.ext; const base = baseOf(x.name);
+  if (ext === 'docx') { ctx.status('Leyendo el documento Word…'); await loadScript(LIB.mammoth); const r = await window.mammoth.convertToHtml({ arrayBuffer: await x.file.arrayBuffer() }); return { html: r.value, title: base }; }
+  if (ext === 'doc') throw new Error('El formato DOC antiguo no se admite. Guárdalo como DOCX desde Word o LibreOffice.');
+  if (ext === 'html' || ext === 'htm') { const text = await readTextSmart(x.file); const d = new DOMParser().parseFromString(text, 'text/html'); const t = d.querySelector('title'); return { html: d.body.innerHTML, title: (t && t.textContent.trim()) || base }; }
+  if (ext === 'md' || ext === 'markdown') { await loadScript(LIB.marked); const text = await readTextSmart(x.file); const html = window.marked.parse(text); const m = text.match(/^#\s+(.+)$/m); return { html, title: m ? m[1].trim() : base }; }
+  if (ext === 'txt') return { html: textToHtml(await readTextSmart(x.file), false), title: base };
+  if (ext === 'rtf') return { html: textToHtml(rtfToText(await readTextSmart(x.file)), false), title: base };
+  if (ext === 'odt') { ctx.status('Leyendo el documento ODT…'); return { html: await odtToHtml(x.file), title: base }; }
+  if (ext === 'epub') { ctx.status('Leyendo el libro…'); const r = await epubToHtml(x.file); return { html: r.html, title: r.title || base }; }
+  if (ext === 'pdf') { ctx.status('Extrayendo el texto del PDF…'); const text = await pdfToText(x.file, ctx); if (!text.trim()) throw new Error('El PDF no contiene texto seleccionable (puede ser un escaneo).'); return { html: textToHtml(text, true), title: base }; }
+  throw new Error('Formato de documento no admitido: .' + ext);
+}
+async function pdfToImages(x, fmt, opts, ctx) {
+  const pdfjs = await getPdfjs(); const pdf = await pdfjs.getDocument({ data: new Uint8Array(await x.file.arrayBuffer()) }).promise; const results = []; const base = baseOf(x.name); const width = String(pdf.numPages).length;
+  for (let i = 1; i <= pdf.numPages; i++) {
+    ctx.status(`Dibujando la página ${i} de ${pdf.numPages}…`); const page = await pdf.getPage(i); const vp = page.getViewport({ scale: Number(opts.pageScale) || 2 }); const c = makeCanvas(vp.width, vp.height); const cx = c.getContext('2d'); cx.fillStyle = '#ffffff'; cx.fillRect(0, 0, c.width, c.height);
+    await page.render({ canvasContext: cx, viewport: vp }).promise;
+    results.push({ name: `${base}-pagina-${String(i).padStart(width, '0')}.${fmt}`, blob: await canvasToBlob(c, fmt === 'png' ? 'image/png' : 'image/jpeg', 0.9) }); ctx.progress(i / pdf.numPages);
+  }
+  return results;
+}
+async function pdfMerge(items, ctx) {
+  await loadScript(LIB.pdflib); const { PDFDocument } = PDFLib; const out = await PDFDocument.create();
+  for (let i = 0; i < items.length; i++) { ctx.status(`Añadiendo ${items[i].name}…`); const src = await PDFDocument.load(await items[i].file.arrayBuffer(), { ignoreEncryption: true }); const pages = await out.copyPages(src, src.getPageIndices()); pages.forEach(p => out.addPage(p)); ctx.progress((i + 1) / items.length); }
+  return [{ name: (items.length === 1 ? baseOf(items[0].name) : 'unido') + '.pdf', blob: new Blob([await out.save()], { type: 'application/pdf' }) }];
+}
+async function pdfSplit(x, ctx) {
+  await loadScript(LIB.pdflib); const { PDFDocument } = PDFLib; const src = await PDFDocument.load(await x.file.arrayBuffer(), { ignoreEncryption: true }); const n = src.getPageCount(); const results = []; const base = baseOf(x.name); const width = String(n).length;
+  for (let i = 0; i < n; i++) { const d = await PDFDocument.create(); const [p] = await d.copyPages(src, [i]); d.addPage(p); results.push({ name: `${base}-pagina-${String(i + 1).padStart(width, '0')}.pdf`, blob: new Blob([await d.save()], { type: 'application/pdf' }) }); ctx.progress((i + 1) / n); }
+  return results;
+}
+async function engineDocument(target, items, opts, ctx) {
+  const id = target.id; if (id === 'pdf-merge') return pdfMerge(items, ctx);
+  const results = [];
+  for (const x of items) {
+    const base = baseOf(x.name);
+    if (id === 'pdf-split') { results.push(...await pdfSplit(x, ctx)); continue; }
+    if (id === 'png-pages' || id === 'jpg-pages') { results.push(...await pdfToImages(x, id === 'png-pages' ? 'png' : 'jpg', opts, ctx)); continue; }
+    const { html, title } = await docToHtml(x, ctx); const t = title || base;
+    ctx.status('Generando ' + target.label + '…');
+    switch (id) {
+      case 'html': results.push({ name: base + '.html', blob: textBlob(wrapHtml(sanitizeHtml(html), t), 'text/html') }); break;
+      case 'txt': results.push({ name: base + '.txt', blob: textBlob(htmlToText(html), 'text/plain') }); break;
+      case 'md': results.push({ name: base + '.md', blob: textBlob(await htmlToMarkdown(html), 'text/markdown') }); break;
+      case 'pdf': results.push({ name: base + '.pdf', blob: await htmlToPdf(html, t, ctx) }); break;
+      case 'docx': results.push({ name: base + '.docx', blob: await htmlToDocx(html, t) }); break;
+      case 'epub': results.push({ name: base + '.epub', blob: await makeEpub(html, t) }); break;
+      default: throw new Error('Salida no admitida: ' + id);
+    }
+  }
+  return results;
+}
+
+/* 13) Motor de hojas de cálculo y datos */
+function xmlToObj(elm) {
+  const obj = {}; if (elm.attributes) for (const a of elm.attributes) obj['@' + a.name] = a.value; let text = '';
+  for (const ch of elm.childNodes) { if (ch.nodeType === 1) { const v = xmlToObj(ch); const k = ch.localName; if (k in obj) { if (!Array.isArray(obj[k])) obj[k] = [obj[k]]; obj[k].push(v); } else obj[k] = v; } else if (ch.nodeType === 3 || ch.nodeType === 4) text += ch.nodeValue; }
+  text = text.trim(); const keys = Object.keys(obj); if (!keys.length) return text; if (text) obj['#text'] = text; return obj;
+}
+function objToXml(obj, root) {
+  const build = (name, val, ind) => { if (Array.isArray(val)) return val.map(v => build(name, v, ind)).join(''); if (val !== null && typeof val === 'object') { const attrs = Object.entries(val).filter(([k]) => k[0] === '@').map(([k, v]) => ` ${safeTag(k.slice(1))}="${esc(v)}"`).join(''); const kids = Object.entries(val).filter(([k]) => k[0] !== '@'); return `${ind}<${name}${attrs}>${kids.length === 1 && kids[0][0] === '#text' ? esc(kids[0][1]) : '\n' + kids.map(([k, v]) => build(k === '#text' ? 'texto' : safeTag(k), v, ind + '  ')).join('') + ind}</${name}>\n`; } return `${ind}<${name}>${esc(val == null ? '' : val)}</${name}>\n`; };
+  return '<?xml version="1.0" encoding="UTF-8"?>\n' + (Array.isArray(obj) ? `<${root}>\n${obj.map(v => build('item', v, '  ')).join('')}</${root}>\n` : build(root, obj, ''));
+}
+function findTable(obj, depth) { depth = depth || 0; if (Array.isArray(obj) && obj.length && obj.every(v => v && typeof v === 'object')) return obj; if (obj && typeof obj === 'object' && depth < 6) for (const v of Object.values(obj)) { const t = findTable(v, depth + 1); if (t) return t; } return null; }
+function flatten(obj, prefix, out) { out = out || {}; prefix = prefix || ''; Object.entries(obj || {}).forEach(([k, v]) => { const key = prefix ? prefix + '.' + k : k; if (v && typeof v === 'object') flatten(v, key, out); else out[key] = v; }); return out; }
+function rowsFrom(arr) { return arr.map(v => (v && typeof v === 'object' && !Array.isArray(v)) ? Object.fromEntries(Object.entries(v).map(([k, c]) => [k, c && typeof c === 'object' ? JSON.stringify(c) : c])) : Array.isArray(v) ? Object.fromEntries(v.map((c, i) => ['col' + (i + 1), c && typeof c === 'object' ? JSON.stringify(c) : c])) : { valor: v }); }
+function objToWorkbook(obj) {
+  const wb = XLSX.utils.book_new(); const add = (name, arr) => { const ws = arr.length && arr.every(Array.isArray) ? XLSX.utils.aoa_to_sheet(arr) : XLSX.utils.json_to_sheet(rowsFrom(arr)); XLSX.utils.book_append_sheet(wb, ws, safeSheet(name)); };
+  if (Array.isArray(obj)) { add('Hoja1', obj); return wb; }
+  if (obj && typeof obj === 'object') { const arrays = Object.entries(obj).filter(([, v]) => Array.isArray(v) && v.length); if (arrays.length) { arrays.forEach(([k, v]) => add(k, v)); return wb; } const t = findTable(obj); if (t) { add('Hoja1', t); return wb; } XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(Object.entries(flatten(obj)).map(([clave, valor]) => ({ clave, valor }))), 'Hoja1'); return wb; }
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet([{ valor: obj }]), 'Hoja1'); return wb;
+}
+async function readData(x, opts) {
+  const ext = x.ext;
+  if (['xlsx', 'xls', 'xlsm', 'xlsb', 'ods'].includes(ext)) return { wb: XLSX.read(await x.file.arrayBuffer(), { type: 'array', cellDates: true }) };
+  if (ext === 'csv' || ext === 'tsv' || ext === 'txt') { const text = (await readTextSmart(x.file)).replace(/^﻿/, ''); const o = { type: 'string', raw: false }; if (ext === 'tsv') o.FS = '\t'; else if (opts.csvDelim && opts.csvDelim !== 'auto') o.FS = opts.csvDelim; return { wb: XLSX.read(text, o) }; }
+  if (ext === 'json') { try { return { obj: JSON.parse(await readTextSmart(x.file)) }; } catch (e) { throw new Error('El JSON no es válido: ' + e.message); } }
+  if (ext === 'yaml' || ext === 'yml') { await loadScript(LIB.jsyaml); return { obj: window.jsyaml.load(await readTextSmart(x.file)) }; }
+  if (ext === 'xml') { const d = new DOMParser().parseFromString(await readTextSmart(x.file), 'application/xml'); if (d.getElementsByTagName('parsererror').length) throw new Error('El XML no es válido.'); return { obj: { [d.documentElement.localName]: xmlToObj(d.documentElement) } }; }
+  throw new Error('Formato de datos no admitido: .' + ext);
+}
+const toWorkbook = src => src.wb || objToWorkbook(src.obj);
+function toObject(src, opts) { if (src.obj !== undefined) return src.obj; const wb = src.wb; const o = opts.headerRow === false ? { header: 1 } : { defval: null }; const sheets = wb.SheetNames.map(n => XLSX.utils.sheet_to_json(wb.Sheets[n], o)); return sheets.length === 1 ? sheets[0] : Object.fromEntries(wb.SheetNames.map((n, i) => [n, sheets[i]])); }
+function aoaToMarkdown(rows) { if (!rows.length) return ''; const w = Math.max(...rows.map(r => r.length)); const cell = v => String(v == null ? '' : v).replace(/\|/g, '\\|').replace(/\n/g, ' '); const line = r => '| ' + Array.from({ length: w }, (_, i) => cell(r[i])).join(' | ') + ' |'; return line(rows[0]) + '\n| ' + Array(w).fill('---').join(' | ') + ' |\n' + rows.slice(1).map(line).join('\n') + '\n'; }
+function aoaToSql(rows, table) {
+  if (!rows.length) return ''; const cols = rows[0].map((c, i) => safeTag(c == null || c === '' ? 'col' + (i + 1) : c)); const lit = v => v == null || v === '' ? 'NULL' : typeof v === 'number' ? String(v) : typeof v === 'boolean' ? (v ? '1' : '0') : "'" + String(v).replace(/'/g, "''") + "'";
+  const create = `CREATE TABLE IF NOT EXISTS ${table} (\n  ${cols.map(c => c + ' TEXT').join(',\n  ')}\n);\n\n`;
+  return create + rows.slice(1).filter(r => r.some(v => v != null && v !== '')).map(r => `INSERT INTO ${table} (${cols.join(', ')}) VALUES (${cols.map((_, i) => lit(r[i])).join(', ')});`).join('\n') + '\n';
+}
+async function engineData(target, items, opts, ctx) {
+  await loadScript(LIB.xlsx); const results = [];
+  for (const x of items) {
+    const base = baseOf(x.name); ctx.status('Leyendo los datos…'); const src = await readData(x, opts); ctx.status('Generando ' + target.label + '…');
+    switch (target.id) {
+      case 'xlsx': case 'ods': { const out = XLSX.write(toWorkbook(src), { bookType: target.id, type: 'array' }); results.push({ name: base + '.' + target.id, blob: new Blob([out], { type: MIME[target.id] }) }); break; }
+      case 'csv': case 'tsv': { const wb = toWorkbook(src); const FS = target.id === 'tsv' ? '\t' : (opts.csvDelim === 'auto' || !opts.csvDelim ? ',' : opts.csvDelim); wb.SheetNames.forEach(n => results.push({ name: (wb.SheetNames.length > 1 ? base + '-' + safeFile(n) : base) + '.' + target.id, blob: textBlob('﻿' + XLSX.utils.sheet_to_csv(wb.Sheets[n], { FS }), MIME[target.id]) })); break; }
+      case 'json': results.push({ name: base + '.json', blob: textBlob(JSON.stringify(toObject(src, opts), null, 2), 'application/json') }); break;
+      case 'yaml': { await loadScript(LIB.jsyaml); results.push({ name: base + '.yaml', blob: textBlob(window.jsyaml.dump(toObject(src, opts), { noRefs: true, lineWidth: 120 }), 'text/yaml') }); break; }
+      case 'xml': results.push({ name: base + '.xml', blob: textBlob(objToXml(toObject(src, opts), safeTag(base)), 'application/xml') }); break;
+      case 'html': case 'pdf': { const wb = toWorkbook(src); const html = wb.SheetNames.map(n => (wb.SheetNames.length > 1 ? `<h2>${esc(n)}</h2>` : '') + XLSX.utils.sheet_to_html(wb.Sheets[n], { header: '', footer: '' })).join('\n'); if (target.id === 'html') results.push({ name: base + '.html', blob: textBlob(wrapHtml(html, base), 'text/html') }); else results.push({ name: base + '.pdf', blob: await htmlToPdf(html, base, ctx) }); break; }
+      case 'md': { const wb = toWorkbook(src); results.push({ name: base + '.md', blob: textBlob(wb.SheetNames.map(n => (wb.SheetNames.length > 1 ? `## ${n}\n\n` : '') + aoaToMarkdown(XLSX.utils.sheet_to_json(wb.Sheets[n], { header: 1 }))).join('\n'), 'text/markdown') }); break; }
+      case 'sql': { const wb = toWorkbook(src); results.push({ name: base + '.sql', blob: textBlob(wb.SheetNames.map(n => aoaToSql(XLSX.utils.sheet_to_json(wb.Sheets[n], { header: 1, defval: null }), safeTag(wb.SheetNames.length > 1 ? n : base))).join('\n'), 'application/sql') }); break; }
+      default: throw new Error('Salida no admitida: ' + target.id);
+    }
+  }
+  return results;
+}
+
+/* 14) Archivos comprimidos, fuentes, subtítulos y salidas universales */
+function untar(u8) {
+  const files = []; const td = new TextDecoder(); let off = 0, longName = null;
+  while (off + 512 <= u8.length) {
+    const hdr = u8.subarray(off, off + 512); if (hdr.every(b => b === 0)) break;
+    const str = (s, l) => { const sub = hdr.subarray(s, s + l); let end = sub.indexOf(0); if (end < 0) end = l; return td.decode(sub.subarray(0, end)); };
+    let name = str(0, 100); const size = parseInt(str(124, 12).trim() || '0', 8) || 0; const type = String.fromCharCode(hdr[156]); const prefix = str(345, 155);
+    if (str(257, 6).startsWith('ustar') && prefix) name = prefix + '/' + name;
+    off += 512; const data = u8.subarray(off, off + size); off += Math.ceil(size / 512) * 512;
+    if (type === 'L') { longName = td.decode(data).replace(/\0+$/, ''); continue; }
+    if (longName) { name = longName; longName = null; }
+    if (type === '0' || type === '\0' || type === '7') files.push({ name, data: data.slice() });
+  }
+  return files;
+}
+function makeTar(entries) {
+  const blocks = []; const enc = new TextEncoder();
+  for (const e of entries) {
+    const hdr = new Uint8Array(512); const w = (s, o, l) => { hdr.set(enc.encode(s).subarray(0, l), o); };
+    let name = e.name.replace(/\\/g, '/'); if (enc.encode(name).length > 100) name = name.slice(-100);
+    w(name, 0, 100); w('0000644\0', 100, 8); w('0000000\0', 108, 8); w('0000000\0', 116, 8); w(e.data.length.toString(8).padStart(11, '0') + '\0', 124, 12); w(Math.floor(Date.now() / 1000).toString(8).padStart(11, '0') + '\0', 136, 12); w('        ', 148, 8); hdr[156] = 48; w('ustar\0', 257, 6); w('00', 263, 2);
+    let sum = 0; for (let i = 0; i < 512; i++) sum += hdr[i]; w(sum.toString(8).padStart(6, '0') + '\0 ', 148, 8);
+    blocks.push(hdr, e.data, new Uint8Array((512 - e.data.length % 512) % 512));
+  }
+  blocks.push(new Uint8Array(1024)); return new Blob(blocks, { type: 'application/x-tar' });
+}
+function dedupeNames(list) { const used = {}; return list.map(r => { let n = r.name; let k = 1; while (used[n]) { k++; const e = extOf(r.name); n = baseOf(r.name) + '-' + k + (e ? '.' + e : ''); } used[n] = 1; return { ...r, name: n }; }); }
+async function extractArchive(x) {
+  const ext = x.ext;
+  if (ext === 'zip') { await loadScript(LIB.jszip); const zip = await JSZip.loadAsync(x.file); const out = []; for (const [path, entry] of Object.entries(zip.files)) { if (entry.dir) continue; out.push({ name: path.split('/').pop(), path, blob: await entry.async('blob') }); } return out; }
+  if (ext === 'tar') return untar(new Uint8Array(await x.file.arrayBuffer())).map(e => ({ name: e.name.split('/').pop(), path: e.name, blob: new Blob([e.data]) }));
+  if (ext === 'tgz' || ext === 'gz') { const raw = new Uint8Array(await decompressBytes(await x.file.arrayBuffer(), 'gzip')); const inner = x.name.replace(/\.(tgz|gz)$/i, ''); if (ext === 'tgz' || /\.tar$/i.test(inner)) return untar(raw).map(e => ({ name: e.name.split('/').pop(), path: e.name, blob: new Blob([e.data]) })); return [{ name: inner.split('/').pop() || 'archivo', path: inner, blob: new Blob([raw]) }]; }
+  throw new Error('Formato comprimido no admitido: .' + ext + ' (RAR y 7z no están disponibles).');
+}
+async function engineArchive(target, items, opts, ctx) {
+  const results = [];
+  for (let i = 0; i < items.length; i++) { ctx.status('Extrayendo ' + items[i].name + '…'); results.push(...(await extractArchive(items[i])).map(e => ({ name: e.name, blob: e.blob }))); ctx.progress((i + 1) / items.length); }
+  if (!results.length) throw new Error('El archivo comprimido está vacío.');
+  return dedupeNames(results);
+}
+async function engineUniversal(target, items, opts, ctx) {
+  if (target.id === 'base64') { const results = []; for (const x of items) results.push({ name: x.name + '.base64.txt', blob: textBlob(await fileToDataUrl(x.file), 'text/plain') }); return results; }
+  const allArchives = items.every(x => ['zip', 'tar', 'tgz', 'gz'].includes(x.ext)); let entries = [];
+  if (allArchives) { for (const x of items) { ctx.status('Extrayendo ' + x.name + '…'); entries.push(...(await extractArchive(x)).map(e => ({ name: e.path || e.name, blob: e.blob }))); } } else entries = items.map(x => ({ name: x.name, blob: x.file }));
+  const name = safeFile(opts.zipName || (items.length === 1 ? baseOf(items[0].name) : 'archivos'));
+  if (target.id === 'zip') { await loadScript(LIB.jszip); const zip = new JSZip(); ctx.status('Comprimiendo…'); entries.forEach(e => zip.file(e.name, e.blob)); const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } }, m => ctx.progress(m.percent / 100)); return [{ name: name + '.zip', blob }]; }
+  const tarEntries = []; for (const e of entries) tarEntries.push({ name: e.name, data: new Uint8Array(await e.blob.arrayBuffer()) });
+  ctx.status('Comprimiendo…'); const gz = await compressBytes(await makeTar(tarEntries).arrayBuffer(), 'gzip');
+  return [{ name: name + '.tar.gz', blob: new Blob([gz], { type: 'application/gzip' }) }];
+}
+async function ttfToWoff(buf) {
+  const dv = new DataView(buf); const u8 = new Uint8Array(buf); const flavor = dv.getUint32(0); const n = dv.getUint16(4);
+  if (![0x00010000, 0x4F54544F, 0x74727565].includes(flavor)) throw new Error('No parece una fuente TTF/OTF válida.');
+  const tables = []; for (let i = 0; i < n; i++) { const o = 12 + i * 16; tables.push({ tag: u8.slice(o, o + 4), checksum: dv.getUint32(o + 4), offset: dv.getUint32(o + 8), length: dv.getUint32(o + 12) }); }
+  const comp = []; let totalSfnt = 12 + 16 * n;
+  for (const t of tables) { const raw = u8.subarray(t.offset, t.offset + t.length); let c = new Uint8Array(await compressBytes(raw, 'deflate')); if (c.length >= raw.length) c = raw; comp.push(c); totalSfnt += pad4(t.length); }
+  let off = 44 + 20 * n; const offsets = comp.map(c => { const o = off; off += pad4(c.length); return o; });
+  const out = new Uint8Array(off); const odv = new DataView(out.buffer);
+  odv.setUint32(0, 0x774F4646); odv.setUint32(4, flavor); odv.setUint32(8, off); odv.setUint16(12, n); odv.setUint32(16, totalSfnt); odv.setUint16(20, 1);
+  tables.forEach((t, i) => { const o = 44 + i * 20; out.set(t.tag, o); odv.setUint32(o + 4, offsets[i]); odv.setUint32(o + 8, comp[i].length); odv.setUint32(o + 12, t.length); odv.setUint32(o + 16, t.checksum); out.set(comp[i], offsets[i]); });
+  return out;
+}
+async function woffToTtf(buf) {
+  const dv = new DataView(buf); const u8 = new Uint8Array(buf); const sig = dv.getUint32(0);
+  if (sig === 0x774F4632) throw new Error('WOFF2 no se admite (usa Brotli). Convierte primero el WOFF2 a TTF con otra herramienta.');
+  if (sig !== 0x774F4646) throw new Error('No parece un archivo WOFF válido.');
+  const flavor = dv.getUint32(4); const n = dv.getUint16(12); const tables = [];
+  for (let i = 0; i < n; i++) { const o = 44 + i * 20; tables.push({ tag: u8.slice(o, o + 4), offset: dv.getUint32(o + 4), compLength: dv.getUint32(o + 8), origLength: dv.getUint32(o + 12), checksum: dv.getUint32(o + 16) }); }
+  const datas = []; for (const t of tables) { const raw = u8.subarray(t.offset, t.offset + t.compLength); datas.push(t.compLength < t.origLength ? new Uint8Array(await decompressBytes(raw, 'deflate')) : raw); }
+  let off = 12 + 16 * n; const offsets = datas.map(d => { const o = off; off += pad4(d.length); return o; });
+  const out = new Uint8Array(off); const odv = new DataView(out.buffer); const es = Math.floor(Math.log2(n)); const sr = Math.pow(2, es) * 16;
+  odv.setUint32(0, flavor); odv.setUint16(4, n); odv.setUint16(6, sr); odv.setUint16(8, es); odv.setUint16(10, n * 16 - sr);
+  tables.forEach((t, i) => { const o = 12 + i * 16; out.set(t.tag, o); odv.setUint32(o + 4, t.checksum); odv.setUint32(o + 8, offsets[i]); odv.setUint32(o + 12, t.origLength); out.set(datas[i], offsets[i]); });
+  return { bytes: out, ext: flavor === 0x4F54544F ? 'otf' : 'ttf' };
+}
+async function engineFont(target, items) {
+  const results = [];
+  for (const x of items) { const buf = await x.file.arrayBuffer(); const base = baseOf(x.name); if (target.id === 'woff') { if (x.ext === 'woff') throw new Error('El archivo ya está en formato WOFF.'); results.push({ name: base + '.woff', blob: new Blob([await ttfToWoff(buf)], { type: 'font/woff' }) }); } else { const r = await woffToTtf(buf); results.push({ name: base + '.' + r.ext, blob: new Blob([r.bytes], { type: MIME[r.ext] }) }); } }
+  return results;
+}
+function parseSubs(text) {
+  text = text.replace(/^﻿/, '').replace(/\r\n?/g, '\n'); const cues = [];
+  const tre = /(?:(\d{1,2}):)?(\d{1,2}):(\d{2})[.,](\d{1,3})\s*-->\s*(?:(\d{1,2}):)?(\d{1,2}):(\d{2})[.,](\d{1,3})/;
+  const sbv = /^(\d+):(\d{2}):(\d{2})\.(\d{3}),(\d+):(\d{2}):(\d{2})\.(\d{3})$/;
+  const toS = (h, m, s, ms) => (Number(h) || 0) * 3600 + Number(m) * 60 + Number(s) + Number(String(ms).padEnd(3, '0')) / 1000;
+  for (const b of text.split(/\n[ \t]*\n+/)) { const lines = b.split('\n'); let ti = lines.findIndex(l => tre.test(l) || sbv.test(l.trim())); if (ti < 0) continue; let m = lines[ti].match(tre); if (m) cues.push({ start: toS(m[1], m[2], m[3], m[4]), end: toS(m[5], m[6], m[7], m[8]), text: lines.slice(ti + 1).join('\n').trim() }); else { m = lines[ti].trim().match(sbv); cues.push({ start: toS(m[1], m[2], m[3], m[4]), end: toS(m[5], m[6], m[7], m[8]), text: lines.slice(ti + 1).join('\n').trim() }); } }
+  if (!cues.length) throw new Error('No se encontraron subtítulos con marcas de tiempo en el archivo.');
+  return cues;
+}
+function fmtTime(s, sep) { s = Math.max(0, s); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), sec = Math.floor(s % 60), ms = Math.round((s - Math.floor(s)) * 1000) % 1000; return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}${sep}${String(ms).padStart(3, '0')}`; }
+async function engineSubtitle(target, items, opts) {
+  const results = []; const off = Number(opts.subOffset) || 0;
+  for (const x of items) {
+    const cues = parseSubs(await readTextSmart(x.file)).map(c => ({ ...c, start: c.start + off, end: c.end + off })).filter(c => c.end > 0); const base = baseOf(x.name); let out;
+    if (target.id === 'srt') out = cues.map((c, i) => `${i + 1}\n${fmtTime(c.start, ',')} --> ${fmtTime(c.end, ',')}\n${c.text}\n`).join('\n');
+    else if (target.id === 'vtt') out = 'WEBVTT\n\n' + cues.map((c, i) => `${i + 1}\n${fmtTime(c.start, '.')} --> ${fmtTime(c.end, '.')}\n${c.text.replace(/\{\\?an\d\}/g, '')}\n`).join('\n');
+    else out = cues.map(c => c.text.replace(/<[^>]+>/g, '').replace(/\{\\?an\d\}/g, '')).join('\n') + '\n';
+    results.push({ name: base + '.' + target.ext, blob: textBlob(out, MIME[target.ext] || 'text/plain') });
+  }
+  return results;
+}
+
+/* 15) Anuncios: inserción de los bloques de AdSense */
+function initAds() {
+  const slots = $$('.ad-slot[data-ad]');
+  if (!ADS.enabled) { slots.forEach(s => s.classList.add('is-placeholder')); }
+  else {
+    slots.forEach(s => {
+      const key = s.dataset.ad; const slotId = ADS.slots[key]; const box = s.querySelector('.ad-box');
+      if (!slotId) { s.hidden = true; return; }
+      const ins = document.createElement('ins'); ins.className = 'adsbygoogle'; ins.style.display = 'block'; ins.setAttribute('data-ad-client', ADS.client); ins.setAttribute('data-ad-slot', slotId); ins.setAttribute('data-ad-format', s.dataset.format || 'auto'); ins.setAttribute('data-full-width-responsive', key === 'sticky' ? 'false' : 'true');
+      box.replaceChildren(ins); s.classList.add('is-live');
+    });
+    const sc = document.createElement('script'); sc.async = true; sc.crossOrigin = 'anonymous';
+    sc.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=' + encodeURIComponent(ADS.client);
+    sc.onload = () => { window.adsbygoogle = window.adsbygoogle || []; if (ADS.autoAds) window.adsbygoogle.push({ google_ad_client: ADS.client, enable_page_level_ads: true }); $$('ins.adsbygoogle').forEach(ins => { if (ins.offsetParent !== null && !ins.dataset.pushed) { ins.dataset.pushed = '1'; window.adsbygoogle.push({}); } }); };
+    document.head.appendChild(sc);
+  }
+  let dismissed = false; try { dismissed = sessionStorage.getItem('cu-sticky-closed') === '1'; } catch (_) {}
+  if (ADS.sticky && !dismissed) { el.adSticky.hidden = false; document.body.classList.add('has-sticky'); }
+  el.adClose.addEventListener('click', () => { el.adSticky.hidden = true; document.body.classList.remove('has-sticky'); try { sessionStorage.setItem('cu-sticky-closed', '1'); } catch (_) {} });
+}
+/* Cuando se muestran los resultados, el anuncio de resultados pasa a ser visible: se activa entonces */
+const resultsObserver = new MutationObserver(() => { if (!el.results.hidden && ADS.enabled && window.adsbygoogle) { const ins = el.results.querySelector('ins.adsbygoogle'); if (ins && !ins.dataset.pushed && ins.offsetParent !== null) { ins.dataset.pushed = '1'; window.adsbygoogle.push({}); } } });
+resultsObserver.observe(el.results, { attributes: true, attributeFilter: ['hidden'] });
+
+/* 16) Tema claro / oscuro */
+function applyTheme(t) { if (t) document.documentElement.setAttribute('data-theme', t); else document.documentElement.removeAttribute('data-theme'); }
+(function initTheme() { let saved = null; try { saved = localStorage.getItem('cu-theme'); } catch (_) {} if (saved === 'dark' || saved === 'light') applyTheme(saved); el.themeToggle.addEventListener('click', () => { const cur = document.documentElement.getAttribute('data-theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); const next = cur === 'dark' ? 'light' : 'dark'; applyTheme(next); try { localStorage.setItem('cu-theme', next); } catch (_) {} }); })();
+
+/* 17) Arranque */
+el.year.textContent = String(new Date().getFullYear());
+renderTiles(''); renderCats(); initAds();
+if (!applyRoute(location.hash)) { renderTargets(); updateHero(); }
+window.Conversor = { state, addFiles, convertAll, setTarget(cat, id) { state.category = cat; state.target = id; state.route = null; renderTargets(); updateHero(); }, getFFmpeg, saveFile, CATS, UNIVERSAL };
+</script>
+</body>
+</html>
